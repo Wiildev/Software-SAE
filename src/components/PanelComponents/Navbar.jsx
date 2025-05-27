@@ -46,7 +46,7 @@ function Navbar() {
 
         {/* Título o logo - visible en todo momento */}
         <div className="ml-8 font-bold">
-          Panel de Operaciones
+          Sistema Automático de Estacionamiento
         </div>
 
         {/* Sección derecha: notificaciones y perfil */}
