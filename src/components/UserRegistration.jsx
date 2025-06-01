@@ -6,74 +6,119 @@ function UserRegistration() {
   const [username, setUsername] = useState('');
   const [documentNumber, setDocumentNumber] = useState('');
   const [email, setEmail] = useState('');
-  const [role, setRole] = useState('');
+  const [role, setRole] = useState('usuario'); // Valor por defecto
   const [phoneNumber, setPhoneNumber] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [acceptPolicy, setAcceptPolicy] = useState(false);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  const [loading, setLoading] = useState(false);
 
   // Función para manejar el envío del formulario
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     // Validación básica
     if (!fullName || !username || !documentNumber || !email || !role || !phoneNumber || !password || !confirmPassword) {
       setError('Por favor, complete todos los campos');
       return;
     }
-    
+
     if (password !== confirmPassword) {
       setError('Las contraseñas no coinciden');
       return;
     }
-    
+
     if (!acceptPolicy) {
       setError('Debe aceptar las políticas de privacidad');
       return;
     }
-    
-    // Aquí iría la lógica para enviar los datos al servidor
-    console.log('Datos de registro:', { 
-      fullName, 
-      username, 
-      documentNumber, 
-      email, 
-      role, 
-      phoneNumber, 
-      password,
-      acceptPolicy 
-    });
-    
-    // Limpiar el formulario después del envío exitoso
+
     setError('');
-    // Aquí podrías redirigir al usuario o mostrar un mensaje de éxito
+    setSuccess('');
+    setLoading(true);
+
+    try {
+      // Realizar la petición al servidor
+      const response = await fetch('http://localhost:3000/api/registro', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          fullName,
+          username,
+          documentNumber,
+          email,
+          role,
+          phoneNumber,
+          password
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.mensaje || 'Error en el registro');
+      }
+
+      // Mostrar mensaje de éxito
+      setSuccess('Usuario registrado exitosamente');
+      
+      // Limpiar el formulario
+      setFullName('');
+      setUsername('');
+      setDocumentNumber('');
+      setEmail('');
+      setRole('usuario');
+      setPhoneNumber('');
+      setPassword('');
+      setConfirmPassword('');
+      setAcceptPolicy(false);
+      
+      // Redirigir después de un tiempo
+      setTimeout(() => {
+        // window.location.href = '/login';
+      }, 2000);
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     // Contenedor del formulario de registro
     <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
       <h2 className="text-2xl font-bold text-center mb-6">Registro de usuario</h2>
-      
+
       {error && (
         <div className="mb-4 p-2 bg-red-100 text-red-700 rounded-md text-center">
           {error}
         </div>
       )}
-      
+
+      {success && (
+        <div className="mb-4 p-2 bg-green-100 text-green-700 rounded-md text-center">
+          {success}
+        </div>
+      )}
+
       {/* Campos del formulario de registro */}
       <form onSubmit={handleSubmit}>
         <div className="mb-4">
           <input
             type="text"
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="Nombre de completo"
+            placeholder="Nombre completo"
             value={fullName}
             onChange={(e) => setFullName(e.target.value)}
             required
+            disabled={loading}
           />
         </div>
-        
+
         <div className="mb-4">
           <input
             type="text"
@@ -82,55 +127,60 @@ function UserRegistration() {
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             required
+            disabled={loading}
           />
         </div>
-        
+
         <div className="mb-4">
           <input
             type="text"
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="Numero de documento"
+            placeholder="Número de documento"
             value={documentNumber}
             onChange={(e) => setDocumentNumber(e.target.value)}
             required
+            disabled={loading}
           />
         </div>
-        
+
         <div className="mb-4">
           <input
             type="email"
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="Correo electronico"
+            placeholder="Correo electrónico"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
+            disabled={loading}
           />
         </div>
-        
+
         <div className="mb-4">
           <select
-            className="w-full px-3 py-2 pr-8 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             value={role}
             onChange={(e) => setRole(e.target.value)}
             required
+            disabled={loading}
           >
-            <option value="" disabled selected>-Seleccione un rol-</option>
+            <option value="">Seleccione un rol</option>
+            <option value="usuario">Usuario</option>
             <option value="admin">Administrador</option>
-            <option value="user">Usuario</option>
           </select>
         </div>
-        
+
         <div className="mb-4">
           <input
             type="tel"
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="Numero de teléfono"
+            placeholder="Número de teléfono"
             value={phoneNumber}
             onChange={(e) => setPhoneNumber(e.target.value)}
             required
+            disabled={loading}
           />
         </div>
-        
+
         <div className="mb-4">
           <input
             type="password"
@@ -139,9 +189,10 @@ function UserRegistration() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
+            disabled={loading}
           />
         </div>
-        
+
         <div className="mb-4">
           <input
             type="password"
@@ -150,39 +201,38 @@ function UserRegistration() {
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             required
+            disabled={loading}
           />
         </div>
-        
-        <div className="mb-6 flex items-center">
+
+        <div className="mb-4 flex items-center">
           <input
             type="checkbox"
-            id="acceptPolicy"
             className="mr-2"
             checked={acceptPolicy}
             onChange={(e) => setAcceptPolicy(e.target.checked)}
-            required
+            disabled={loading}
           />
-
-          {/* Check de aceptacon de politicas */}
-          <label htmlFor="acceptPolicy" className="text-sm text-gray-600">
-            Aceptar las políticas de privacidad
+          <label className="text-sm text-gray-600">
+            Acepto las políticas de privacidad y términos de servicio
           </label>
         </div>
-        
+
         <button
           type="submit"
-          className="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+          className={`w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
+          disabled={loading}
         >
-          Registrase
+          {loading ? 'Registrando...' : 'Registrarse'}
         </button>
+
       </form>
-      
-      {/* Link de enlace a la página de inicio de sesion */}
       <div className="mt-4 text-center">
-        <a href="#" className="text-blue-500 hover:underline text-sm">
+        <a href="/login" className="text-blue-500 hover:underline">
           ¿Ya tienes una cuenta? Inicia sesión
         </a>
       </div>
+      
     </div>
   );
 }

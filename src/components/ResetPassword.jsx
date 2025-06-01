@@ -78,7 +78,7 @@ function ResetPassword() {
 
      {/* Link de enlace a la página de inicio de sesion */}
       <div className="mt-6 text-center">
-        <a href="#" className="text-blue-500 hover:underline">
+        <a href="/Login" className="text-blue-500 hover:underline">
           Volver al inicio de sesión
         </a>
       </div>

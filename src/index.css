@@ -1,2 +1,4 @@
 /* Este archivo importa el framework TailwindCSS para trabajar los estilos. */
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;

@@ -1,31 +1,59 @@
 import { useState } from 'react';
 
 function LoginForm() {
-  // A través de estas variables se definen los estados para los campos de inicio de sesión.
-
+  // Estados para los campos de inicio de sesión
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [role, setRole] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  // Esta función se ejecuta cuando se envía el formulario.
-  const handleSubmit = (e) => {
+  // Esta función se ejecuta cuando se envía el formulario
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     // Validación básica
-    if (!username || !password || !role) {
+    if (!username || !password) {
       setError('Por favor, complete todos los campos');
       return;
     }
     
-    console.log('Datos de inicio de sesión:', { username, password, role });
-    setError(''); // Limpiar error si todo está bien
-    
-    // Agregar la lógica para autenticar al usuario.
+    setError('');
+    setLoading(true);
+
+    try {
+      // Realizar la petición al servidor
+      const response = await fetch('http://localhost:3000/api/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, password }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.mensaje || 'Error en la autenticación');
+      }
+
+      // Guardar el token en localStorage
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('user', JSON.stringify(data.usuario));
+
+      // Mostrar mensaje de éxito
+      alert('¡Inicio de sesión exitoso!');
+      
+      // Aquí podrías redirigir al usuario a otra página
+      // window.location.href = '/dashboard';
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    // Esta es la estructura del formulario de inicio de sesión.
+    // Esta es la estructura del formulario de inicio de sesión
     <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
       <div className="flex justify-center mb-6">
         <div className="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center">
@@ -34,9 +62,9 @@ function LoginForm() {
           </svg>
         </div>
       </div>
-      
+
       <h2 className="text-2xl font-bold text-center mb-6">Iniciar sesión</h2>
-      
+
       {/* Campos del formulario de inicio de sesion */}
       <form onSubmit={handleSubmit}>
         <div className="mb-4">
@@ -47,9 +75,10 @@ function LoginForm() {
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             required
+            disabled={loading}
           />
         </div>
-        
+
         <div className="mb-4">
           <input
             type="password"
@@ -58,23 +87,10 @@ function LoginForm() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
+            disabled={loading}
           />
         </div>
-        
-        {/* Roles */}
-        <div className="mb-6">
-          <select
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            value={role}
-            onChange={(e) => setRole(e.target.value)}
-            required
-          >
-            <option value="" disabled selected>-- Seleccione un rol --</option>
-            <option value="admin">Administrador</option>
-            <option value="user">Usuario</option>
-          </select>
-        </div>
-        
+
         {/* Mensaje de error */}
         {error && (
           <div className="mb-4 p-2 bg-red-100 text-red-700 rounded-md text-center">
@@ -84,18 +100,18 @@ function LoginForm() {
 
         <button
           type="submit"
-          className="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+          className={`w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
+          disabled={loading}
         >
-          Iniciar sesión
+          {loading ? 'Iniciando sesión...' : 'Iniciar sesión'}
         </button>
       </form>
 
-      
       {/* Enlaces de registro y recuperación de contraseña */}
       <div className="mt-4 text-center">
-        <a href="#" className="text-blue-500 hover:underline">Registrarse</a>
+        <a href="/UserRegistration" className="text-blue-500 hover:underline">Registrarse</a>
         <span className="mx-2">•</span>
-        <a href="#" className="text-blue-500 hover:underline">Recuperar contraseña</a>
+        <a href="/recuperar-password" className="text-blue-500 hover:underline">Recuperar contraseña</a>
       </div>
     </div>
   );
