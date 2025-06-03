@@ -4,6 +4,7 @@ function LoginForm() {
   // Estados para los campos de inicio de sesión
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [role, setRole] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -12,7 +13,7 @@ function LoginForm() {
     e.preventDefault();
 
     // Validación básica
-    if (!username || !password) {
+    if (!username || !password || !role) {
       setError('Por favor, complete todos los campos');
       return;
     }
@@ -27,7 +28,7 @@ function LoginForm() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ username, password }),
+        body: JSON.stringify({ username, password, role }),
       });
 
       const data = await response.json();
@@ -36,15 +37,19 @@ function LoginForm() {
         throw new Error(data.mensaje || 'Error en la autenticación');
       }
 
-      // Guardar el token en localStorage
+      // Guardar el token y el rol en localStorage
       localStorage.setItem('token', data.token);
-      localStorage.setItem('user', JSON.stringify(data.usuario));
+      localStorage.setItem('user', JSON.stringify({...data.usuario, role}));
 
       // Mostrar mensaje de éxito
       alert('¡Inicio de sesión exitoso!');
       
-      // Aquí podrías redirigir al usuario a otra página
-      // window.location.href = '/dashboard';
+      // Aquí podrías redirigir al usuario a otra página según su rol
+      // if (role === 'admin') {
+      //   window.location.href = '/dashboard-admin';
+      // } else {
+      //   window.location.href = '/dashboard-usuario';
+      // }
     } catch (error) {
       setError(error.message);
     } finally {
@@ -89,6 +94,21 @@ function LoginForm() {
             required
             disabled={loading}
           />
+        </div>
+
+        {/* Nuevo campo para selección de rol */}
+        <div className="mb-4">
+          <select
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            value={role}
+            onChange={(e) => setRole(e.target.value)}
+            required
+            disabled={loading}
+          >
+            <option value="">Seleccione su rol</option>
+            <option value="usuario">Usuario</option>
+            <option value="admin">Administrador</option>
+          </select>
         </div>
 
         {/* Mensaje de error */}
