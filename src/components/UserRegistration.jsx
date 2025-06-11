@@ -6,7 +6,7 @@ function UserRegistration() {
   const [username, setUsername] = useState('');
   const [documentNumber, setDocumentNumber] = useState('');
   const [email, setEmail] = useState('');
-  const [role, setRole] = useState('usuario'); // Valor por defecto
+  const [role, setRole] = useState('empleado'); // Valor por defecto
   const [phoneNumber, setPhoneNumber] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -39,50 +39,60 @@ function UserRegistration() {
     setSuccess('');
     setLoading(true);
 
+    const userData = {
+      fullName,
+      username,
+      documentNumber,
+      email,
+      role,
+      phoneNumber,
+      password
+    };
+
     try {
+      console.log('Intentando conectar a:', 'http://localhost:3000/api/registro');
+      console.log('Datos a enviar:', userData);
+
       // Realizar la petición al servidor
       const response = await fetch('http://localhost:3000/api/registro', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          fullName,
-          username,
-          documentNumber,
-          email,
-          role,
-          phoneNumber,
-          password
-        }),
+        body: JSON.stringify(userData),
+        mode: 'cors',
+        credentials: 'omit'
       });
 
+      // Imprimir la respuesta completa para depuración
+      console.log('Status:', response.status);
+      console.log('Status Text:', response.statusText);
+      console.log('Headers:', Object.fromEntries(response.headers.entries()));
+
       const data = await response.json();
+      console.log('Respuesta del servidor:', data);
 
       if (!response.ok) {
-        throw new Error(data.mensaje || 'Error en el registro');
+        throw new Error(data.error || 'Error en el registro');
       }
 
       // Mostrar mensaje de éxito
-      setSuccess('Usuario registrado exitosamente');
+      setSuccess(data.mensaje || 'Usuario registrado exitosamente');
       
       // Limpiar el formulario
       setFullName('');
       setUsername('');
       setDocumentNumber('');
       setEmail('');
-      setRole('usuario');
+      setRole('empleado');
       setPhoneNumber('');
       setPassword('');
       setConfirmPassword('');
       setAcceptPolicy(false);
       
-      // Redirigir después de un tiempo
-      setTimeout(() => {
-        // window.location.href = '/login';
-      }, 2000);
     } catch (error) {
-      setError(error.message);
+      console.error('Error completo:', error);
+      setError(error.message || 'Error al conectar con el servidor');
     } finally {
       setLoading(false);
     }
@@ -164,7 +174,7 @@ function UserRegistration() {
             disabled={loading}
           >
             <option value="">Seleccione un rol</option>
-            <option value="usuario">Usuario</option>
+            <option value="empleado">Empleado</option>
             <option value="admin">Administrador</option>
           </select>
         </div>

@@ -6,6 +6,7 @@ function LoginForm() {
   const [password, setPassword] = useState('');
   const [role, setRole] = useState('');
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
 
   // Esta función se ejecuta cuando se envía el formulario
@@ -15,10 +16,12 @@ function LoginForm() {
     // Validación básica
     if (!username || !password || !role) {
       setError('Por favor, complete todos los campos');
+      setSuccess('');
       return;
     }
     
     setError('');
+    setSuccess('');
     setLoading(true);
 
     try {
@@ -34,24 +37,29 @@ function LoginForm() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.mensaje || 'Error en la autenticación');
+        throw new Error(data.error || 'Error en la autenticación');
       }
 
+      // Mostrar mensaje de éxito
+      setSuccess(data.mensaje || 'Inicio de sesión exitoso');
+      setError('');
+
       // Guardar el token y el rol en localStorage
-      localStorage.setItem('token', data.token);
       localStorage.setItem('user', JSON.stringify({...data.usuario, role}));
 
-      // Mostrar mensaje de éxito
-      alert('¡Inicio de sesión exitoso!');
-      
-      // Aquí podrías redirigir al usuario a otra página según su rol
-      // if (role === 'admin') {
-      //   window.location.href = '/dashboard-admin';
-      // } else {
-      //   window.location.href = '/dashboard-usuario';
-      // }
+      // Esperar 2 segundos antes de redirigir
+      setTimeout(() => {
+        // Redirigir según el rol
+        if (role === 'admin') {
+          window.location.href = '/dashboard-admin';
+        } else {
+          window.location.href = '/dashboard-usuario';
+        }
+      }, 2000);
+
     } catch (error) {
       setError(error.message);
+      setSuccess('');
     } finally {
       setLoading(false);
     }
@@ -106,7 +114,7 @@ function LoginForm() {
             disabled={loading}
           >
             <option value="">Seleccione su rol</option>
-            <option value="usuario">Usuario</option>
+            <option value="empleado">Empleado</option>
             <option value="admin">Administrador</option>
           </select>
         </div>
@@ -115,6 +123,13 @@ function LoginForm() {
         {error && (
           <div className="mb-4 p-2 bg-red-100 text-red-700 rounded-md text-center">
             {error}
+          </div>
+        )}
+
+        {/* Mensaje de éxito */}
+        {success && (
+          <div className="mb-4 p-2 bg-green-100 text-green-700 rounded-md text-center">
+            {success}
           </div>
         )}
 
