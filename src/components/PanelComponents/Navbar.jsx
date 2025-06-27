@@ -1,14 +1,18 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
 // Iconos importadis de React Icons
 import { FaBars, FaTimes, FaBell, FaUser, FaChevronDown, FaClipboardList, FaChartBar, FaFileAlt, FaUserCircle, FaSignOutAlt, FaQuestionCircle, FaCog } from 'react-icons/fa';
 
 function Navbar() {
+  const navigate = useNavigate();
   // Estado para controlar si el menú está abierto o cerrado
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   // Estado para controlar si el menú de perfil está abierto o cerrado
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   // Estado para controlar si el menú de notificaciones está abierto o cerrado
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  // Estado para el tipo de usuario
+  const [userType, setUserType] = useState('Admin');
   // Número de notificaciones pendientes (esto podría venir de una API en una aplicación real)
   const [notificationCount] = useState(3);
   // Ejemplo de notificaciones
@@ -17,6 +21,24 @@ function Navbar() {
     { id: 2, message: "Nuevo usuario registrado", time: "Hace 30 min" },
     { id: 3, message: "Reporte completado", time: "Hace 1 hora" }
   ]);
+
+  // Obtener el tipo de usuario del localStorage al cargar el componente
+  useEffect(() => {
+    const userData = localStorage.getItem('user');
+    if (userData) {
+      try {
+        const user = JSON.parse(userData);
+        if (user.role === 'empleado') {
+          setUserType('Emple');
+        } else {
+          setUserType('Admin');
+        }
+      } catch (error) {
+        console.error('Error al parsear datos del usuario:', error);
+        setUserType('Admin');
+      }
+    }
+  }, []);
 
   // Función para alternar el estado del menú
   const toggleMenu = () => {
@@ -33,6 +55,14 @@ function Navbar() {
   const toggleNotifications = () => {
     setIsNotificationsOpen(!isNotificationsOpen);
     if (isProfileMenuOpen) setIsProfileMenuOpen(false);
+  };
+
+  // Función para cerrar sesión
+  const handleLogout = () => {
+    // Limpiar el localStorage
+    localStorage.removeItem('user');
+    // Redirigir a la página de login
+    window.location.href = '/login';
   };
 
   return (
@@ -93,17 +123,13 @@ function Navbar() {
               <div className="bg-white rounded-full p-1 mr-2">
                 <FaUser className="text-blue-500" size={18} />
               </div>
-              <span className="text-white font-medium">Admin</span>
+              <span className="text-white font-medium">{userType}</span>
               <FaChevronDown className="text-white ml-2" size={14} />
             </div>
 
             {/* Menú desplegable del perfil */}
             {isProfileMenuOpen && (
               <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-20">
-                <a href="#" className="block px-4 py-2 text-gray-700 hover:bg-gray-100 flex items-center">
-                  <FaUserCircle className="mr-3 text-gray-600" size={16} />
-                  <span>Cuenta</span>
-                </a>
                 <a href="#" className="block px-4 py-2 text-gray-700 hover:bg-gray-100 flex items-center">
                   <FaQuestionCircle className="mr-3 text-gray-600" size={16} />
                   <span>Ayuda</span>
@@ -112,11 +138,15 @@ function Navbar() {
                   <FaCog className="mr-3 text-gray-600" size={16} />
                   <span>Configuración</span>
                 </a>
+                <Link to="/cuenta" className="block px-4 py-2 text-gray-700 hover:bg-gray-100 flex items-center">
+                  <FaUserCircle className="mr-3 text-gray-600" size={16} />
+                  <span>Cuenta</span>
+                </Link>
                 <div className="border-t border-gray-200 my-1"></div>
-                <a href="#" className="block px-4 py-2 text-gray-700 hover:bg-gray-100 flex items-center">
+                <button type="button" onClick={handleLogout} className="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 flex items-center">
                   <FaSignOutAlt className="mr-3 text-gray-600" size={16} />
                   <span>Cerrar sesión</span>
-                </a>
+                </button>
               </div>
             )}
           </div>
@@ -137,7 +167,7 @@ function Navbar() {
           {/* Opciones principales del menú */}
           <ul className="py-2 flex-grow">
             {/* Opción Registros */}
-            <li className="px-4 py-3 hover:bg-gray-100 flex items-center text-gray-700">
+            <li className="px-4 py-3 hover:bg-gray-100 flex items-center text-gray-700 cursor-pointer" onClick={() => navigate('/panel')}>
               <FaClipboardList className="mr-3 text-gray-600" />
               <span>Registros</span>
             </li>
@@ -149,16 +179,16 @@ function Navbar() {
             </li>
 
             {/* Opción Reporte */}
-            <li className="px-4 py-3 hover:bg-gray-100 flex items-center text-gray-700">
+            <Link to="/reporte" className="px-4 py-3 hover:bg-gray-100 flex items-center text-gray-700">
               <FaFileAlt className="mr-3 text-gray-600" />
               <span>Reporte</span>
-            </li>
+            </Link>
 
             {/* Opción Cuenta */}
-            <li className="px-4 py-3 hover:bg-gray-100 flex items-center text-gray-700">
+            <Link to="/cuenta" className="px-4 py-3 hover:bg-gray-100 flex items-center text-gray-700">
               <FaUserCircle className="mr-3 text-gray-600" />
               <span>Cuenta</span>
-            </li>
+            </Link>
           </ul>
           
           {/* Sección inferior con separador y cierre de sesión */}
@@ -167,7 +197,7 @@ function Navbar() {
             <div className="border-t border-gray-200"></div>
 
             {/* Opción Cerrar sesión */}
-            <li className="px-4 py-3 hover:bg-gray-100 flex items-center text-gray-700 list-none">
+            <li className="px-4 py-3 hover:bg-gray-100 flex items-center text-gray-700 list-none cursor-pointer" onClick={handleLogout}>
               <FaSignOutAlt className="mr-3 text-gray-600" />
               <span>Cerrar sesión</span>
             </li>

@@ -17,20 +17,20 @@ export function VehicleProvider({ children }) {
 
   // Marcar un vehículo como salido
   const markAsExited = (id) => {
-    const now = new Date();
-    let hours = now.getHours();
-    const minutes = now.getMinutes().toString().padStart(2, '0');
-    const ampm = hours >= 12 ? 'PM' : 'AM';
-    
-    hours = hours % 12;
-    hours = hours ? hours : 12;
-    hours = hours.toString().padStart(2, '0');
-    
-    const exitTime = `${hours}:${minutes} ${ampm}`;
-    
-    setVehicles(vehicles.map(vehicle => 
-      vehicle.id === id ? { ...vehicle, estado: `Salió ${exitTime}` } : vehicle
-    ));
+    setVehicles(vehicles.map(vehicle => {
+      if (vehicle.id === id && !vehicle.salida) {
+        const now = new Date();
+        let hours = now.getHours();
+        const minutes = now.getMinutes().toString().padStart(2, '0');
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        hours = hours % 12;
+        hours = hours ? hours : 12;
+        hours = hours.toString().padStart(2, '0');
+        const exitTime = `${hours}:${minutes} ${ampm}`;
+        return { ...vehicle, estado: `Salió`, salida: exitTime };
+      }
+      return vehicle;
+    }));
   };
 
   // Eliminar un vehículo

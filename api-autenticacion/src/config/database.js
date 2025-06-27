@@ -3,7 +3,7 @@ const mysql = require('mysql2/promise');
 const dbConfig = {
   host: 'localhost',
   user: 'root',
-  password: '',  // Cambia esto según tu configuración local
+  password: '',  
   database: 'sae_software',
   waitForConnections: true,
   connectionLimit: 10,

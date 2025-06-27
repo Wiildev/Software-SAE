@@ -49,12 +49,7 @@ function LoginForm() {
 
       // Esperar 2 segundos antes de redirigir
       setTimeout(() => {
-        // Redirigir según el rol
-        if (role === 'admin') {
-          window.location.href = '/dashboard-admin';
-        } else {
-          window.location.href = '/dashboard-usuario';
-        }
+        window.location.href = '/panel';
       }, 2000);
 
     } catch (error) {

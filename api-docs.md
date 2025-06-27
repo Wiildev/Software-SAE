@@ -103,6 +103,7 @@ Método: DELETE
 
 ### Ejemplo de Registro Exitoso
 ```json
+
 // Solicitud POST a /api/registro
 {
     "fullName": "Juan Pérez",
@@ -154,10 +155,3 @@ Método: DELETE
     "mensaje": "Empleado actualizado exitosamente"
 }
 ```
-
-## Notas de Seguridad
-
-1. Todas las contraseñas se almacenan de forma segura usando hash
-2. Las rutas de gestión deberían estar protegidas con autenticación
-3. Los datos sensibles como contraseñas nunca se devuelven en las respuestas
-4. Se recomienda usar HTTPS en producción 

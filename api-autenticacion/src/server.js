@@ -6,6 +6,7 @@ const { createPool } = require('./config/database');
 // Importar rutas
 const rutaUsuario = require('./routes/rutausuario');
 const rutaEmpleados = require('./routes/empleados.routes');
+const ticketsRoutes = require('./routes/tickets.routes');
 
 const app = express();
 const port = 3000;
@@ -343,6 +344,7 @@ app.delete('/api/empleados/:id', async (req, res) => {
 // Usar las rutas
 app.use('/api', rutaUsuario);           // Rutas de autenticación
 app.use('/api/empleados', rutaEmpleados); // Rutas de gestión de empleados
+app.use('/api/tickets', ticketsRoutes);
 
 app.listen(port, () => {
     console.log(`Servidor corriendo en http://localhost:${port}`);
