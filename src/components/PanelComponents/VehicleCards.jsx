@@ -1,5 +1,5 @@
-import React from 'react';
-import { useVehicles } from '../../context/VehicleContext';
+import React, { useEffect, useState } from 'react';
+// import { useVehicles } from '../../context/VehicleContext'; // Ya no se usa
 
 function Card({ title, count, color, icon, borderColor }) {
   // Mapeo de colores para los diferentes tipos de tarjetas
@@ -27,18 +27,24 @@ function Card({ title, count, color, icon, borderColor }) {
 }
 
 // Componente que muestra todas las tarjetas de vehículos
-function VehicleCards() {
-  const { vehicles } = useVehicles();
-  
-  // Contar vehículos actualmente en el estacionamiento (estado = 'En parqueo')
-  const activeVehicles = vehicles.filter(v => v.estado === 'En parqueo');
-  
+function VehicleCards({ reload }) {
+  const [vehicles, setVehicles] = useState([]);
+
+  useEffect(() => {
+    fetch('http://localhost:3000/api/tickets/detalles')
+      .then(res => res.json())
+      .then(data => setVehicles(data.tickets || []));
+  }, [reload]);
+
+  // Contar vehículos actualmente en el estacionamiento (estado = 'ocupado')
+  const activeVehicles = vehicles.filter(v => v.estado === 'ocupado');
+
   // Contar por tipo de vehículo
-  const carCount = activeVehicles.filter(v => v.tipo === 'CARRO').length;
-  const motoCount = activeVehicles.filter(v => v.tipo === 'MOTO').length;
-  const bikeCount = activeVehicles.filter(v => v.tipo === 'BICICLETA').length;
-  const totalCount = activeVehicles.length;
-  
+  const carCount = activeVehicles.filter(v => v.tipoVehiculo === 'CARRO').length;
+  const motoCount = activeVehicles.filter(v => v.tipoVehiculo === 'MOTO').length;
+  const bikeCount = activeVehicles.filter(v => v.tipoVehiculo === 'BICICLETA').length;
+  const totalCount = carCount + motoCount + bikeCount;
+
   return (
     <div className="w-full p-4">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">

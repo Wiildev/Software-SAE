@@ -1,6 +1,8 @@
 const Ticket = require('../models/Ticket');
 const Vehiculo = require('../models/Vehiculo');
 const Plaza = require('../models/Plaza');
+const { Parser } = require('json2csv');
+const ExcelJS = require('exceljs');
 
 class TicketController {
   constructor(db) {
@@ -105,6 +107,58 @@ class TicketController {
     } catch (error) {
       console.error('Error en obtenerTicketsConDetalles:', error);
       res.status(500).json({ error: 'Error en el servidor' });
+    }
+  }
+
+  // Exportar tickets en CSV o Excel
+  async exportarTickets(req, res) {
+    try {
+      const { fechaInicio, fechaFin, formato } = req.query;
+      // Validar fechas
+      if (!fechaInicio || !fechaFin) {
+        return res.status(400).json({ error: 'Debe proporcionar fechaInicio y fechaFin' });
+      }
+      // Obtener tickets filtrados por rango de fecha
+      const [tickets] = await this.ticketModel.db.query(
+        `SELECT t.id_Ticket, v.placa, v.tipoVehiculo, t.fechaIngreso, t.horaIngreso, t.fechaSalida, t.horaSalida, p.plaza, p.estado
+         FROM Ticket t
+         JOIN Vehiculo v ON t.id_Placa = v.id_Placa
+         JOIN Plaza p ON t.id_Plaza = p.id_Plaza
+         WHERE t.fechaIngreso BETWEEN ? AND ?
+         ORDER BY t.fechaIngreso, t.horaIngreso`,
+        [fechaInicio, fechaFin]
+      );
+      if (formato === 'csv') {
+        // CSV
+        const parser = new Parser();
+        const csv = parser.parse(tickets);
+        res.header('Content-Type', 'text/csv');
+        res.attachment('reporte_tickets.csv');
+        return res.send(csv);
+      } else {
+        // XLSX por defecto
+        const workbook = new ExcelJS.Workbook();
+        const worksheet = workbook.addWorksheet('Tickets');
+        worksheet.columns = [
+          { header: 'ID Ticket', key: 'id_Ticket', width: 10 },
+          { header: 'Placa', key: 'placa', width: 15 },
+          { header: 'Tipo Vehículo', key: 'tipoVehiculo', width: 15 },
+          { header: 'Fecha Ingreso', key: 'fechaIngreso', width: 15 },
+          { header: 'Hora Ingreso', key: 'horaIngreso', width: 12 },
+          { header: 'Fecha Salida', key: 'fechaSalida', width: 15 },
+          { header: 'Hora Salida', key: 'horaSalida', width: 12 },
+          { header: 'Plaza', key: 'plaza', width: 10 },
+          { header: 'Estado Plaza', key: 'estado', width: 12 },
+        ];
+        worksheet.addRows(tickets);
+        res.header('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        res.attachment('reporte_tickets.xlsx');
+        await workbook.xlsx.write(res);
+        res.end();
+      }
+    } catch (error) {
+      console.error('Error en exportarTickets:', error);
+      res.status(500).json({ error: 'Error al exportar los tickets' });
     }
   }
 }

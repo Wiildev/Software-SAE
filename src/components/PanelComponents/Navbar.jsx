@@ -173,7 +173,7 @@ function Navbar() {
             </li>
 
             {/* Opción Estadística */}
-            <li className="px-4 py-3 hover:bg-gray-100 flex items-center text-gray-700">
+            <li className="px-4 py-3 hover:bg-gray-100 flex items-center text-gray-700 cursor-pointer" onClick={() => navigate('/estadisticas')}>
               <FaChartBar className="mr-3 text-gray-600" />
               <span>Estadística</span>
             </li>

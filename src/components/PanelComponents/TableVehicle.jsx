@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { FaFilter, FaSearch, FaPrint, FaUndo, FaTrash } from 'react-icons/fa';
 
-function TableVehicle() {
+function TableVehicle({ reload, onReload }) {
   const [vehicles, setVehicles] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [showFilters, setShowFilters] = useState(false);
 
-  // Cargar los tickets con detalles al montar el componente
+  // Cargar los tickets con detalles al montar el componente o cuando reload cambie
   const fetchTicketsWithDetails = () => {
     fetch('http://localhost:3000/api/tickets/detalles')
       .then(res => res.json())
@@ -15,7 +15,7 @@ function TableVehicle() {
 
   useEffect(() => {
     fetchTicketsWithDetails();
-  }, []);
+  }, [reload]);
 
   // Eliminar ticket
   const removeVehicle = async (id_Ticket) => {
@@ -23,6 +23,7 @@ function TableVehicle() {
     const res = await fetch(`http://localhost:3000/api/tickets/${id_Ticket}`, { method: 'DELETE' });
     if (res.ok) {
       setVehicles(vehicles.filter(v => v.id_Ticket !== id_Ticket));
+      if (onReload) onReload();
     } else {
       alert('Error al eliminar');
     }
@@ -33,6 +34,7 @@ function TableVehicle() {
     const res = await fetch(`http://localhost:3000/api/tickets/${id_Ticket}/salida`, { method: 'PUT' });
     if (res.ok) {
       fetchTicketsWithDetails(); // Recargar la lista
+      if (onReload) onReload();
     } else {
       alert('Error al marcar salida');
     }

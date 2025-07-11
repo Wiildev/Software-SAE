@@ -71,7 +71,6 @@ function RegistroVehicleForm({ onRegister }) {
       })
     });
     if (response.ok) {
-      alert('Vehículo registrado correctamente');
       setPlaca('');
       setTipoVehiculo('');
       setPlaza('');
