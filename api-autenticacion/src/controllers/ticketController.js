@@ -110,14 +110,21 @@ class TicketController {
     }
   }
 
-  // Exportar tickets en CSV o Excel
+  // Exportar tickets en CSV o Excel (versión mejorada)
   async exportarTickets(req, res) {
     try {
-      const { fechaInicio, fechaFin, formato } = req.query;
+      const { fechaInicio, fechaFin, formato = 'xlsx' } = req.body;
+      
       // Validar fechas
       if (!fechaInicio || !fechaFin) {
         return res.status(400).json({ error: 'Debe proporcionar fechaInicio y fechaFin' });
       }
+
+      // Validar formato
+      if (formato !== 'csv' && formato !== 'xlsx') {
+        return res.status(400).json({ error: 'Formato debe ser csv o xlsx' });
+      }
+
       // Obtener tickets filtrados por rango de fecha
       const [tickets] = await this.ticketModel.db.query(
         `SELECT t.id_Ticket, v.placa, v.tipoVehiculo, t.fechaIngreso, t.horaIngreso, t.fechaSalida, t.horaSalida, p.plaza, p.estado
@@ -128,6 +135,7 @@ class TicketController {
          ORDER BY t.fechaIngreso, t.horaIngreso`,
         [fechaInicio, fechaFin]
       );
+
       if (formato === 'csv') {
         // CSV
         const parser = new Parser();

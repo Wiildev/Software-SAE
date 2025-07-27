@@ -220,7 +220,16 @@ Esta documentación describe todos los endpoints disponibles, agrupados por inte
 ---
 
 ### Exportar tickets (CSV/XLSX)
-**GET** `/api/tickets/exportar?fechaInicio=YYYY-MM-DD&fechaFin=YYYY-MM-DD&formato=csv|xlsx`
+**POST** `/api/tickets/export`
+
+**Body:**
+```json
+{
+  "fechaInicio": "2024-01-01",
+  "fechaFin": "2024-12-31",
+  "formato": "xlsx"
+}
+```
 
 **Descripción:** Descarga un archivo con los tickets del rango de fechas indicado en formato CSV o Excel (XLSX).
 

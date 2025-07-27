@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 const Report = () => {
   const [fechaInicio, setFechaInicio] = useState('');
   const [fechaFin, setFechaFin] = useState('');
-  const [formato, setFormato] = useState('xsl');
+  const [formato, setFormato] = useState('xlsx');
   const [descargando, setDescargando] = useState(false);
 
   const handleDescargar = async () => {
@@ -13,14 +13,24 @@ const Report = () => {
     }
     setDescargando(true);
     try {
-      const formatoApi = formato === 'xsl' ? 'xlsx' : 'csv';
-      const url = `http://localhost:3000/api/tickets/exportar?fechaInicio=${fechaInicio}&fechaFin=${fechaFin}&formato=${formatoApi}`;
-      const response = await fetch(url);
+      const response = await fetch('http://localhost:3000/api/tickets/export', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          fechaInicio,
+          fechaFin,
+          formato
+        })
+      });
+      
       if (!response.ok) throw new Error('Error al descargar el reporte');
+      
       const blob = await response.blob();
       const link = document.createElement('a');
       link.href = window.URL.createObjectURL(blob);
-      link.download = formato === 'xsl' ? 'reporte_tickets.xlsx' : 'reporte_tickets.csv';
+      link.download = `reporte_tickets.${formato}`;
       document.body.appendChild(link);
       link.click();
       link.remove();
@@ -32,39 +42,59 @@ const Report = () => {
   };
 
   return (
-    <div className="w-full max-w-2xl mx-auto mt-16 bg-white rounded-xl p-8 py-16 min-h-[500px] flex flex-col items-center">
-      <h2 className="text-center text-gray-700 text-lg mb-8">Seleccione el rando de fecha que desea descargar</h2>
-      <div className="flex gap-4 mb-8 w-full justify-center">
-        <input
-          type="date"
-          className="border border-gray-300 rounded px-3 py-2 w-1/2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-400"
-          placeholder="dd/mm/aaaa"
-          value={fechaInicio}
-          onChange={e => setFechaInicio(e.target.value)}
-        />
-        <input
-          type="date"
-          className="border border-gray-300 rounded px-3 py-2 w-1/2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-400"
-          placeholder="dd/mm/aaaa"
-          value={fechaFin}
-          onChange={e => setFechaFin(e.target.value)}
-        />
+    <div className="w-full max-w-[1100px] mx-auto mt-8 bg-white rounded-2xl shadow p-8 px-12 py-16 min-h-[600px] border border-gray-200">
+      <div className="text-center mb-8">
+        <h2 className="text-3xl font-bold text-gray-800 mb-4">Generar Reporte</h2>
+        <p className="text-gray-600">Descarga reportes de tickets en formato CSV o Excel</p>
       </div>
-      <select
-        className="border border-gray-300 rounded px-3 py-2 mb-8 w-1/2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-400"
-        value={formato}
-        onChange={e => setFormato(e.target.value)}
-      >
-        <option value="xsl">XSL</option>
-        <option value="csv">CSV</option>
-      </select>
-      <button
-        className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-12 rounded-full text-lg shadow focus:outline-none focus:ring-2 focus:ring-blue-400 mt-8 disabled:opacity-60"
-        onClick={handleDescargar}
-        disabled={descargando}
-      >
-        {descargando ? 'Descargando...' : 'Descargar'}
-      </button>
+
+      <div className="max-w-md mx-auto space-y-6">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Fecha de inicio
+          </label>
+          <input
+            type="date"
+            value={fechaInicio}
+            onChange={(e) => setFechaInicio(e.target.value)}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Fecha de fin
+          </label>
+          <input
+            type="date"
+            value={fechaFin}
+            onChange={(e) => setFechaFin(e.target.value)}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Formato de archivo
+          </label>
+          <select
+            value={formato}
+            onChange={(e) => setFormato(e.target.value)}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="xlsx">Excel (XLSX)</option>
+            <option value="csv">CSV</option>
+          </select>
+        </div>
+
+        <button
+          onClick={handleDescargar}
+          disabled={descargando || !fechaInicio || !fechaFin}
+          className="w-full bg-blue-500 hover:bg-blue-600 disabled:bg-gray-400 text-white font-semibold py-3 px-6 rounded-lg transition duration-200 disabled:cursor-not-allowed"
+        >
+          {descargando ? 'Descargando...' : 'Descargar Reporte'}
+        </button>
+      </div>
     </div>
   );
 };

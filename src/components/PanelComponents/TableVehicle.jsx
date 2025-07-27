@@ -17,6 +17,124 @@ function TableVehicle({ reload, onReload }) {
     fetchTicketsWithDetails();
   }, [reload]);
 
+  // Función para imprimir el ticket
+  const printTicket = (vehicle) => {
+    // Crear el contenido del ticket
+    const ticketContent = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Ticket de Estacionamiento</title>
+        <style>
+          body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: white;
+          }
+          .ticket {
+            width: 300px;
+            border: 2px solid #000;
+            padding: 20px;
+            text-align: center;
+            background: white;
+          }
+          .header {
+            border-bottom: 2px solid #000;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+          }
+          .welcome {
+            font-size: 18px;
+            font-weight: bold;
+            color: #2563eb;
+            margin-bottom: 10px;
+          }
+          .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 8px 0;
+            text-align: left;
+          }
+          .label {
+            font-weight: bold;
+            color: #374151;
+          }
+          .value {
+            color: #1f2937;
+          }
+          .placa {
+            font-size: 20px;
+            font-weight: bold;
+            color: #059669;
+            margin: 10px 0;
+            padding: 8px;
+            border: 2px solid #059669;
+            border-radius: 5px;
+          }
+          .footer {
+            margin-top: 20px;
+            font-size: 12px;
+            color: #6b7280;
+            border-top: 1px solid #d1d5db;
+            padding-top: 10px;
+          }
+          @media print {
+            body { margin: 0; }
+            .ticket { border: none; }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="ticket">
+          <div class="header">
+            <div class="welcome">Bienvenido al Centro Comercial</div>
+            <div style="font-size: 14px; color: #6b7280;">Ticket de Estacionamiento</div>
+          </div>
+          
+          <div class="placa">${vehicle.placa}</div>
+          
+          <div class="info-row">
+            <span class="label">Tipo de Vehículo:</span>
+            <span class="value">${vehicle.tipoVehiculo}</span>
+          </div>
+          
+          <div class="info-row">
+            <span class="label">Plaza Asignada:</span>
+            <span class="value">${vehicle.plaza}</span>
+          </div>
+          
+          <div class="info-row">
+            <span class="label">Fecha de Ingreso:</span>
+            <span class="value">${new Date(vehicle.fechaIngreso).toLocaleDateString('es-ES')}</span>
+          </div>
+          
+          <div class="info-row">
+            <span class="label">Hora de Ingreso:</span>
+            <span class="value">${vehicle.horaIngreso}</span>
+          </div>
+          
+          <div class="footer">
+            <div>Conserve este ticket</div>
+            <div>Gracias por su visita</div>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+
+    // Crear una nueva ventana para imprimir
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(ticketContent);
+    printWindow.document.close();
+    
+    // Esperar a que se cargue el contenido y luego imprimir
+    printWindow.onload = function() {
+      printWindow.print();
+      printWindow.close();
+    };
+  };
+
   // Eliminar ticket
   const removeVehicle = async (id_Ticket) => {
     if (!window.confirm('¿Está seguro de eliminar el registro?')) return;
@@ -168,7 +286,7 @@ function TableVehicle({ reload, onReload }) {
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex space-x-2">
                     <button 
-                      onClick={() => window.print()} // Simulación de impresión
+                      onClick={() => printTicket(vehicle)}
                       className="p-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition"
                       title="Imprimir ticket"
                     >

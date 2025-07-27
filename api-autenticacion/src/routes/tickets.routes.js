@@ -24,7 +24,7 @@ router.get('/vehiculos', (req, res) => ticketController.obtenerVehiculos(req, re
 // Obtener todos los tickets con detalles de vehículo y plaza
 router.get('/detalles', (req, res) => ticketController.obtenerTicketsConDetalles(req, res));
 
-// Exportar tickets en CSV o Excel
-router.get('/exportar', (req, res) => ticketController.exportarTickets(req, res));
+// Exportar tickets en CSV o Excel (versión mejorada)
+router.post('/export', (req, res) => ticketController.exportarTickets(req, res));
 
 module.exports = router; 
