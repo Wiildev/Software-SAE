@@ -5,12 +5,20 @@ function TableVehicle({ reload, onReload }) {
   const [vehicles, setVehicles] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [showFilters, setShowFilters] = useState(false);
+  const [error, setError] = useState(null);
 
   // Cargar los tickets con detalles al montar el componente o cuando reload cambie
   const fetchTicketsWithDetails = () => {
     fetch('http://localhost:3000/api/tickets/detalles')
       .then(res => res.json())
-      .then(data => setVehicles(data.tickets || []));
+      .then(data => {
+        setVehicles(data.tickets || []);
+        if (onReload) onReload();
+      })
+      .catch(err => {
+        setError('Error al cargar los datos');
+        console.error(err);
+      });
   };
 
   useEffect(() => {
@@ -253,65 +261,79 @@ function TableVehicle({ reload, onReload }) {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {filteredData.map((vehicle, idx) => (
-              <tr key={idx} className="hover:bg-gray-50">
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span className={`px-3 py-1 rounded-full text-sm font-medium ${getPlacaBackgroundColor(vehicle.placa)}`}>
-                    {vehicle.placa}
-                  </span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span className={`px-3 py-1 rounded-full text-sm font-medium ${getTipoBackgroundColor(vehicle.tipoVehiculo)}`}>
-                    {vehicle.tipoVehiculo}
-                  </span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="flex items-center">
-                    {vehicle.horaIngreso}
-                  </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm font-medium">
-                    {vehicle.plaza}
-                  </span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  {vehicle.estado === 'ocupado' ? 'En parqueo' : 'Libre'}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm font-medium">
-                    {vehicle.horaSalida || ''}
-                  </span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="flex space-x-2">
-                    <button 
-                      onClick={() => printTicket(vehicle)}
-                      className="p-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition"
-                      title="Imprimir ticket"
-                    >
-                      <FaPrint />
-                    </button>
-                    <button 
-                      onClick={() => markAsExited(vehicle.id_Ticket)}
-                      className="p-2 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-lg transition"
-                      disabled={!!vehicle.fechaSalida}
-                      title="Marcar salida"
-                      style={{ opacity: vehicle.fechaSalida ? 0.5 : 1 }}
-                    >
-                      <FaUndo />
-                    </button>
-                    <button 
-                      onClick={() => removeVehicle(vehicle.id_Ticket)}
-                      className="p-2 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg transition"
-                      title="Eliminar registro"
-                    >
-                      <FaTrash />
-                    </button>
-                  </div>
+            {error ? (
+              <tr>
+                <td colSpan="7" className="px-6 py-4 text-center text-red-500">
+                  {error}
                 </td>
               </tr>
-            ))}
+            ) : filteredData.length === 0 ? (
+              <tr>
+                <td colSpan="7" className="px-6 py-4 text-center text-gray-500">
+                  No hay vehículos registrados
+                </td>
+              </tr>
+            ) : (
+              filteredData.map((vehicle, idx) => (
+                <tr key={idx} className="hover:bg-gray-50">
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${getPlacaBackgroundColor(vehicle.placa)}`}>
+                      {vehicle.placa}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${getTipoBackgroundColor(vehicle.tipoVehiculo)}`}>
+                      {vehicle.tipoVehiculo}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="flex items-center">
+                      {vehicle.horaIngreso}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm font-medium">
+                      {vehicle.plaza}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    {vehicle.estado === 'ocupado' ? 'En parqueo' : 'Libre'}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm font-medium">
+                      {vehicle.horaSalida || ''}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="flex space-x-2">
+                      <button 
+                        onClick={() => printTicket(vehicle)}
+                        className="p-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition"
+                        title="Imprimir ticket"
+                      >
+                        <FaPrint />
+                      </button>
+                      <button 
+                        onClick={() => markAsExited(vehicle.id_Ticket)}
+                        className="p-2 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-lg transition"
+                        disabled={!!vehicle.fechaSalida}
+                        title="Marcar salida"
+                        style={{ opacity: vehicle.fechaSalida ? 0.5 : 1 }}
+                      >
+                        <FaUndo />
+                      </button>
+                      <button 
+                        onClick={() => removeVehicle(vehicle.id_Ticket)}
+                        className="p-2 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg transition"
+                        title="Eliminar registro"
+                      >
+                        <FaTrash />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>

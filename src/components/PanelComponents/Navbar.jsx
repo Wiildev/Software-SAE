@@ -1,6 +1,7 @@
+import React from 'react';
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-// Iconos importadis de React Icons
+// Iconos importados de React Icons
 import { FaBars, FaTimes, FaBell, FaUser, FaChevronDown, FaClipboardList, FaChartBar, FaFileAlt, FaUserCircle, FaSignOutAlt, FaQuestionCircle, FaCog } from 'react-icons/fa';
 
 function Navbar() {
@@ -62,7 +63,7 @@ function Navbar() {
     // Limpiar el localStorage
     localStorage.removeItem('user');
     // Redirigir a la página de login
-    window.location.href = '/login';
+    navigate('/login');
   };
 
   return (
@@ -70,7 +71,11 @@ function Navbar() {
       {/* Barra de navegación principal - fijada en la parte superior */}
       <nav className="bg-blue-500 text-white p-4 flex justify-between items-center w-full">
         {/* Botón de menú hamburguesa */}
-        <button onClick={toggleMenu} className="text-white focus:outline-none">
+        <button 
+          onClick={toggleMenu} 
+          className="text-white focus:outline-none"
+          aria-label="toggle menu"
+        >
           {isMenuOpen ? <FaTimes size={24} /> : <FaBars size={24} />}
         </button>
 
@@ -82,7 +87,11 @@ function Navbar() {
         {/* Sección derecha: notificaciones y perfil */}
         <div className="flex items-center space-x-4">
           <div className="relative">
-            <button onClick={toggleNotifications} className="text-white focus:outline-none relative">
+            <button 
+              onClick={toggleNotifications} 
+              className="text-white focus:outline-none relative"
+              aria-label="notifications"
+            >
               <FaBell size={24} />
               {notificationCount > 0 && (
                 <span className="absolute -top-2 -right-2 bg-blue-400 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">

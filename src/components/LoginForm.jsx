@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 
 function LoginForm() {
   // Estados para los campos de inicio de sesión
@@ -49,7 +49,12 @@ function LoginForm() {
 
       // Esperar 2 segundos antes de redirigir
       setTimeout(() => {
-        window.location.href = '/panel';
+        // Usar navigate si está disponible, sino usar window.location
+        if (window.navigate) {
+          window.navigate('/panel');
+        } else {
+          window.location.href = '/panel';
+        }
       }, 2000);
 
     } catch (error) {
@@ -116,14 +121,22 @@ function LoginForm() {
 
         {/* Mensaje de error */}
         {error && (
-          <div className="mb-4 p-2 bg-red-100 text-red-700 rounded-md text-center">
+          <div 
+            className="mb-4 p-2 bg-red-100 text-red-700 rounded-md text-center"
+            role="alert"
+            aria-live="polite"
+          >
             {error}
           </div>
         )}
 
         {/* Mensaje de éxito */}
         {success && (
-          <div className="mb-4 p-2 bg-green-100 text-green-700 rounded-md text-center">
+          <div 
+            className="mb-4 p-2 bg-green-100 text-green-700 rounded-md text-center"
+            role="status"
+            aria-live="polite"
+          >
             {success}
           </div>
         )}

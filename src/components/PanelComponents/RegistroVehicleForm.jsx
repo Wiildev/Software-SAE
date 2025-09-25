@@ -100,6 +100,7 @@ function RegistroVehicleForm({ onRegister }) {
             <label className="block text-gray-600 mb-3 text-center font-medium">Tipo de vehículo</label>
             <div className="flex justify-center gap-2">
               <button
+                data-testid="carro-button"
                 type="button"
                 onClick={() => handleTipoVehiculoChange('carro')}
                 className={`flex items-center justify-center p-4 border rounded-md ${tipoVehiculo === 'carro' ? 'border-blue-500 text-blue-500 bg-blue-50' : 'border-gray-300 text-gray-500'}`}
@@ -107,6 +108,7 @@ function RegistroVehicleForm({ onRegister }) {
                 <FaCar size={28} />
               </button>
               <button
+                data-testid="moto-button"
                 type="button"
                 onClick={() => handleTipoVehiculoChange('moto')}
                 className={`flex items-center justify-center p-4 border rounded-md ${tipoVehiculo === 'moto' ? 'border-purple-500 text-purple-500 bg-purple-50' : 'border-gray-300 text-gray-500'}`}
@@ -114,6 +116,7 @@ function RegistroVehicleForm({ onRegister }) {
                 <FaMotorcycle size={28} />
               </button>
               <button
+                data-testid="bicicleta-button"
                 type="button"
                 onClick={() => handleTipoVehiculoChange('bicicleta')}
                 className={`flex items-center justify-center p-4 border rounded-md ${tipoVehiculo === 'bicicleta' ? 'border-orange-500 text-orange-500 bg-orange-50' : 'border-gray-300 text-gray-500'}`}

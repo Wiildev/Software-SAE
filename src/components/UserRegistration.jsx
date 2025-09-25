@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 
 function UserRegistration() {
   // Estados para los campos del formulario
@@ -104,24 +104,36 @@ function UserRegistration() {
       <h2 className="text-2xl font-bold text-center mb-6">Registro de usuario</h2>
 
       {error && (
-        <div className="mb-4 p-2 bg-red-100 text-red-700 rounded-md text-center">
+        <div 
+          className="mb-4 p-2 bg-red-100 text-red-700 rounded-md text-center"
+          role="alert"
+          aria-live="polite"
+        >
           {error}
         </div>
       )}
 
       {success && (
-        <div className="mb-4 p-2 bg-green-100 text-green-700 rounded-md text-center">
+        <div 
+          className="mb-4 p-2 bg-green-100 text-green-700 rounded-md text-center"
+          role="status"
+          aria-live="polite"
+        >
           {success}
         </div>
       )}
 
       {/* Campos del formulario de registro */}
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} role="form">
         <div className="mb-4">
+          <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 mb-1">
+            Nombre completo
+          </label>
           <input
+            id="fullName"
             type="text"
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="Nombre completo"
+            placeholder="Ej. Juan Pérez"
             value={fullName}
             onChange={(e) => setFullName(e.target.value)}
             required
@@ -130,10 +142,14 @@ function UserRegistration() {
         </div>
 
         <div className="mb-4">
+          <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-1">
+            Nombre de usuario
+          </label>
           <input
+            id="username"
             type="text"
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="Nombre de usuario"
+            placeholder="Ej. juanperez"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             required
@@ -142,10 +158,14 @@ function UserRegistration() {
         </div>
 
         <div className="mb-4">
+          <label htmlFor="documentNumber" className="block text-sm font-medium text-gray-700 mb-1">
+            Número de documento
+          </label>
           <input
+            id="documentNumber"
             type="text"
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="Número de documento"
+            placeholder="Ej. 123456789"
             value={documentNumber}
             onChange={(e) => setDocumentNumber(e.target.value)}
             required
@@ -154,10 +174,14 @@ function UserRegistration() {
         </div>
 
         <div className="mb-4">
+          <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+            Correo electrónico
+          </label>
           <input
+            id="email"
             type="email"
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="Correo electrónico"
+            placeholder="Ej. juan@ejemplo.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
@@ -166,7 +190,11 @@ function UserRegistration() {
         </div>
 
         <div className="mb-4">
+          <label htmlFor="role" className="block text-sm font-medium text-gray-700 mb-1">
+            Rol
+          </label>
           <select
+            id="role"
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             value={role}
             onChange={(e) => setRole(e.target.value)}
@@ -180,10 +208,14 @@ function UserRegistration() {
         </div>
 
         <div className="mb-4">
+          <label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-700 mb-1">
+            Número de teléfono
+          </label>
           <input
+            id="phoneNumber"
             type="tel"
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="Número de teléfono"
+            placeholder="Ej. 1234567890"
             value={phoneNumber}
             onChange={(e) => setPhoneNumber(e.target.value)}
             required
@@ -192,10 +224,14 @@ function UserRegistration() {
         </div>
 
         <div className="mb-4">
+          <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+            Contraseña
+          </label>
           <input
+            id="password"
             type="password"
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="Contraseña"
+            placeholder="Ingrese su contraseña"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
@@ -204,10 +240,14 @@ function UserRegistration() {
         </div>
 
         <div className="mb-4">
+          <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
+            Confirmar contraseña
+          </label>
           <input
+            id="confirmPassword"
             type="password"
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="Confirmar contraseña"
+            placeholder="Confirme su contraseña"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             required
@@ -217,13 +257,14 @@ function UserRegistration() {
 
         <div className="mb-4 flex items-center">
           <input
+            id="acceptPolicy"
             type="checkbox"
             className="mr-2"
             checked={acceptPolicy}
             onChange={(e) => setAcceptPolicy(e.target.checked)}
             disabled={loading}
           />
-          <label className="text-sm text-gray-600">
+          <label htmlFor="acceptPolicy" className="text-sm text-gray-600">
             Acepto las políticas de privacidad y términos de servicio
           </label>
         </div>
