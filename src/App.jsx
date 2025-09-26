@@ -2,10 +2,10 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import LoginForm from './components/LoginForm';
 import UserRegistration from './components/UserRegistration';
 import ResetPassword from './components/ResetPassword';
-import VehicleCards from './components/panelcomponents/VehicleCards';
-import Navbar from './components/panelcomponents/Navbar';
-import RegistroVehicleForm from './components/panelcomponents/RegistroVehicleForm';
-import TableVehicle from './components/panelcomponents/TableVehicle';
+import VehicleCards from './components/PanelComponents/VehicleCards';
+import Navbar from './components/PanelComponents/Navbar';
+import RegistroVehicleForm from './components/PanelComponents/RegistroVehicleForm';
+import TableVehicle from './components/PanelComponents/TableVehicle';
 import Account from './components/Account';
 import Report from './components/Report';
 import Statistics from './components/Statistics';
