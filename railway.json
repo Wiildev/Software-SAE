@@ -1,0 +1,22 @@
+
+{
+  "$schema": "https://railway.app/railway.schema.json",
+  "services": [
+    {
+      "name": "frontend",
+      "root": ".",
+      "build": {
+        "command": "npm install --legacy-peer-deps && npm run build"
+      },
+      "startCommand": "serve -s dist -l tcp://0.0.0.0:$PORT"
+    },
+    {
+      "name": "backend",
+      "root": "api-autenticacion",
+      "build": {
+        "command": "npm install --legacy-peer-deps"
+      },
+      "startCommand": "npm start"
+    }
+  ]
+}
