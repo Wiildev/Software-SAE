@@ -1,3 +1,4 @@
+require('dotenv').config();
 const { createPool } = require('./database');
 
 async function testConnection() {

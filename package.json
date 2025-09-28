@@ -3,9 +3,9 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "cd api-autenticacion && npm start",
     "dev": "vite",
-    "build": "vite build",
+    "build": "cd api-autenticacion && npm install",
+    "start": "cd api-autenticacion && npm start",
     "preview": "vite preview",
     "serve": "serve -s dist -l tcp://0.0.0.0:$PORT",
     "test": "jest --watchAll",

@@ -9,7 +9,6 @@ const rutaEmpleados = require('./routes/empleados.routes');
 const ticketsRoutes = require('./routes/tickets.routes');
 
 const app = express();
-const port = process.env.PORT || 3000;
 
 // Middleware
 app.use(cors({
@@ -130,8 +129,8 @@ app.post('/api/registro', async (req, res) => {
                     tipoUsuario,
                     telefono,
                     contrasena
-                ) VALUES (?, ?, ?, ?, ?, ?, ?)
-            `;
+                ) VALUES (?, ?, ?, ?, ?, ?, ?)`
+            ;
 
             console.log('Ejecutando query:', insertQuery);
             
@@ -360,8 +359,8 @@ app.get('/api/estadisticas', async (req, res) => {
             SELECT TABLE_NAME
             FROM information_schema.tables
             WHERE table_schema = 'sae_software'
-            AND TABLE_NAME IN ('plaza', 'ticket', 'empleado', 'vehiculo')
-        `);
+            AND TABLE_NAME IN ('plaza', 'ticket', 'empleado', 'vehiculo')`
+        );
 
         console.log('Tablas encontradas:', tables.map(t => t.TABLE_NAME));
 
@@ -371,8 +370,8 @@ app.get('/api/estadisticas', async (req, res) => {
             const [occupancyResult] = await connection.query(`
                 SELECT
                     (SELECT COUNT(*) FROM plaza WHERE estado = 'Ocupado') as occupied,
-                    (SELECT COUNT(*) FROM plaza) as total
-            `);
+                    (SELECT COUNT(*) FROM plaza) as total`
+            );
 
             if (occupancyResult && occupancyResult.length > 0) {
                 const { occupied, total } = occupancyResult[0];
@@ -393,8 +392,8 @@ app.get('/api/estadisticas', async (req, res) => {
                 FROM ticket
                 WHERE fechaIngreso >= DATE_SUB(CURDATE(), INTERVAL 6 MONTH)
                 GROUP BY DATE_FORMAT(fechaIngreso, '%Y-%m')
-                ORDER BY MIN(fechaIngreso)
-            `);
+                ORDER BY MIN(fechaIngreso)`
+            );
             monthlyHistoryResult = historyQuery || [];
             console.log('Historial mensual:', monthlyHistoryResult.length, 'registros');
         } catch (error) {
@@ -419,8 +418,8 @@ app.get('/api/estadisticas', async (req, res) => {
                 FROM vehiculo v
                 LEFT JOIN ticket t ON v.id_Placa = t.id_placa
                 GROUP BY v.tipoVehiculo
-                ORDER BY count DESC
-            `);
+                ORDER BY count DESC`
+            );
             rankingResult = rankingQuery || [];
             console.log('Ranking de vehículos:', rankingResult.length, 'tipos');
         } catch (error) {
@@ -442,8 +441,8 @@ app.get('/api/estadisticas', async (req, res) => {
                 FROM ticket
                 WHERE fechaIngreso = CURDATE()
                 GROUP BY HOUR(horaIngreso)
-                ORDER BY hour
-            `);
+                ORDER BY hour`
+            );
             hourlyResult = hourlyQuery || [];
             console.log('Ocupación por horas:', hourlyResult.length, 'horas con datos');
         } catch (error) {
@@ -473,8 +472,8 @@ app.get('/api/estadisticas', async (req, res) => {
                 FROM ticket t
                 INNER JOIN vehiculo v ON t.id_placa = v.id_Placa
                 WHERE t.fechaSalida IS NULL AND t.horaSalida IS NULL
-                GROUP BY v.tipoVehiculo
-            `);
+                GROUP BY v.tipoVehiculo`
+            );
             currentVehiclesByType = currentQuery || [];
             console.log('Vehículos actuales:', currentVehiclesByType.length, 'tipos activos');
         } catch (error) {
@@ -571,7 +570,13 @@ app.get('/api/estadisticas-mock', (req, res) => {
     res.json(mockStats);
 });
 
-app.listen(port, () => {
-    console.log(`Servidor escuchando en el puerto ${port}`);
-});
- 
+// Exportar la aplicación para Vercel
+module.exports = app;
+
+// Iniciar el servidor solo si el archivo se ejecuta directamente
+if (require.main === module) {
+  const PORT = process.env.PORT || 3001;
+  app.listen(PORT, () => {
+    console.log(`Servidor escuchando en el puerto ${PORT}`);
+  });
+}
