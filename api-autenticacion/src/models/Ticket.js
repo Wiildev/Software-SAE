@@ -54,7 +54,7 @@ class Ticket {
         t.horaSalida,
         TIMESTAMPDIFF(MINUTE, CONCAT(t.fechaIngreso, ' ', t.horaIngreso), CONCAT(t.fechaSalida, ' ', t.horaSalida)) AS duracion
       FROM Ticket t
-      JOIN Vehiculo v ON t.id_Placa = v.id_Placa
+      JOIN Vehiculo v ON t.id_placa = v.id_Placa
       JOIN Plaza p ON t.id_Plaza = p.id_Plaza
       ORDER BY t.fechaIngreso DESC, t.horaIngreso DESC
     `);
