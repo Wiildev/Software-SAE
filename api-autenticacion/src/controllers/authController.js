@@ -53,7 +53,7 @@ class AuthController {
       }
 
       // Validar contraseña
-      const isValidPassword = await this.userModel.validatePassword(password, user.contrasena); // CORREGIDO: user.password -> user.contrasena
+      const isValidPassword = await this.userModel.validatePassword(password, user.contraseña); // CORREGIDO de nuevo para usar la ñ
       if (!isValidPassword) {
         return res.status(401).json({ mensaje: 'Credenciales inválidas' });
       }

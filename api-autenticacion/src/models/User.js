@@ -23,7 +23,7 @@ class User {
     const hashedPassword = await bcrypt.hash(userData.password, salt);
 
     const { results } = await this.db.query(
-      'INSERT INTO empleado (nombreCompleto, nombreUsuario, numeroDocumento, correoElectronico, tipoUsuario, telefono, contrasena) VALUES (?, ?, ?, ?, ?, ?, ?)',
+      'INSERT INTO empleado (nombreCompleto, nombreUsuario, numeroDocumento, correoElectronico, tipoUsuario, telefono, contraseña) VALUES (?, ?, ?, ?, ?, ?, ?)',
       [
         userData.fullName,
         userData.username,
@@ -42,4 +42,4 @@ class User {
   }
 }
 
-module.exports = User; 
+module.exports = User;
