@@ -49,6 +49,7 @@ class Ticket {
         t.fechaIngreso,
         t.horaIngreso,
         p.plaza,
+        p.estado,
         t.fechaSalida,
         t.horaSalida,
         TIMESTAMPDIFF(MINUTE, CONCAT(t.fechaIngreso, ' ', t.horaIngreso), CONCAT(t.fechaSalida, ' ', t.horaSalida)) AS duracion
