@@ -46,17 +46,19 @@ class Ticket {
         t.id_Ticket,
         v.placa,
         v.tipoVehiculo,
+        t.fechaIngreso,
         t.horaIngreso,
         p.plaza,
-        p.estado,
+        t.fechaSalida,
         t.horaSalida,
         TIMESTAMPDIFF(MINUTE, CONCAT(t.fechaIngreso, ' ', t.horaIngreso), CONCAT(t.fechaSalida, ' ', t.horaSalida)) AS duracion
       FROM Ticket t
       JOIN Vehiculo v ON t.id_Placa = v.id_Placa
       JOIN Plaza p ON t.id_Plaza = p.id_Plaza
+      ORDER BY t.fechaIngreso DESC, t.horaIngreso DESC
     `);
     return rows;
   }
 }
 
-module.exports = Ticket; 
+module.exports = Ticket;
