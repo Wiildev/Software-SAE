@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import apiClient from '../api/apiClient'; // Importamos el cliente de API
 
 const Report = () => {
   const [fechaInicio, setFechaInicio] = useState('');
@@ -13,28 +14,24 @@ const Report = () => {
     }
     setDescargando(true);
     try {
-      const response = await fetch('http://localhost:3000/api/tickets/export', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          fechaInicio,
-          fechaFin,
-          formato
-        })
+      const response = await apiClient.post('/tickets/export', {
+        fechaInicio,
+        fechaFin,
+        formato
+      }, {
+        responseType: 'blob', // ¡Importante! Le decimos a axios que esperamos un blob
       });
       
-      if (!response.ok) throw new Error('Error al descargar el reporte');
-      
-      const blob = await response.blob();
+      const blob = new Blob([response.data], { type: response.headers['content-type'] });
       const link = document.createElement('a');
       link.href = window.URL.createObjectURL(blob);
       link.download = `reporte_tickets.${formato}`;
       document.body.appendChild(link);
       link.click();
       link.remove();
+
     } catch (error) {
+      console.error('Error al descargar el reporte:', error);
       alert('No se pudo descargar el reporte.');
     } finally {
       setDescargando(false);

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import apiClient from '../../api/apiClient'; // Ajustada la ruta de importación
 import { FaCar, FaMotorcycle, FaBiking } from 'react-icons/fa';
 
 function RegistroVehicleForm({ onRegister }) {
@@ -60,24 +61,25 @@ function RegistroVehicleForm({ onRegister }) {
       alert('No se pudo obtener el empleado logueado.');
       return;
     }
-    const response = await fetch('http://localhost:3000/api/tickets', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
+
+    try {
+      const response = await apiClient.post('/tickets', {
         placa,
         tipoVehiculo: tipoVehiculo.toUpperCase(),
         plaza,
         id_Empleado
-      })
-    });
-    if (response.ok) {
+      });
+
+      // Si la petición es exitosa (status 2xx)
       setPlaca('');
       setTipoVehiculo('');
       setPlaza('');
       if (onRegister) onRegister(); // Notificar al padre para recargar la tabla
-    } else {
-      const data = await response.json();
-      alert('Error: ' + (data.error || 'No se pudo registrar'));
+    
+    } catch (error) {
+      // Axios encapsula el error en error.response
+      const errorMessage = error.response?.data?.error || 'No se pudo registrar el vehículo';
+      alert('Error: ' + errorMessage);
     }
   };
 

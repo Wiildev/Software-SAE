@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import apiClient from '../api/apiClient'; // Importamos el cliente de API
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -243,15 +244,9 @@ function Statistics() {
         setLoading(true);
         setError(null);
         
-        // Usar datos reales de la base de datos
-        const response = await fetch('http://localhost:3000/api/estadisticas');
-        
-        if (!response.ok) {
-          throw new Error(`Error del servidor: ${response.status}`);
-        }
-        
-        const data = await response.json();
-        console.log('Datos recibidos:', data);
+        // Usar datos reales de la API con apiClient
+        const response = await apiClient.get('/estadisticas');
+        const data = response.data; // Con axios, los datos están en response.data
 
         // Procesar datos para los gráficos
         const processedStats = {
@@ -274,7 +269,7 @@ function Statistics() {
         setStats(processedStats);
       } catch (error) {
         console.error("Error fetching statistics:", error);
-        setError(error.message);
+        setError(error.response?.data?.error || error.message);
         
         // Datos de respaldo en caso de error
         setStats({
@@ -310,7 +305,7 @@ function Statistics() {
     return () => clearInterval(interval);
   }, []);
 
-  if (loading) {
+  if (loading && !stats) { // Muestra el loader solo en la carga inicial
     return (
       <div className="flex justify-center items-center h-screen">
         <div className="text-center">
@@ -320,6 +315,8 @@ function Statistics() {
       </div>
     );
   }
+  
+  if (!stats) return null; // Previene renderizado si no hay datos de stats
 
   return (
     <div className="container mx-auto px-4 py-8 bg-gray-50 min-h-screen">

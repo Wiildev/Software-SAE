@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
+import apiClient from '../api/apiClient'; // Importamos el cliente de API
 
 function LoginForm() {
-  // Estados para los campos de inicio de sesión
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [role, setRole] = useState('');
@@ -9,47 +9,31 @@ function LoginForm() {
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // Esta función se ejecuta cuando se envía el formulario
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validación básica
     if (!username || !password || !role) {
       setError('Por favor, complete todos los campos');
       setSuccess('');
       return;
     }
-    
+
     setError('');
     setSuccess('');
     setLoading(true);
 
     try {
-      // Realizar la petición al servidor
-      const response = await fetch('http://localhost:3000/api/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ username, password, role }),
-      });
+      // ¡Usamos apiClient! La URL base ya está configurada.
+      const response = await apiClient.post('/login', { username, password, role });
 
-      const data = await response.json();
+      const data = response.data; // Con axios, la respuesta está en `response.data`
 
-      if (!response.ok) {
-        throw new Error(data.error || 'Error en la autenticación');
-      }
-
-      // Mostrar mensaje de éxito
       setSuccess(data.mensaje || 'Inicio de sesión exitoso');
       setError('');
 
-      // Guardar el token y el rol en localStorage
-      localStorage.setItem('user', JSON.stringify({...data.usuario, role}));
+      localStorage.setItem('user', JSON.stringify({ ...data.usuario, role }));
 
-      // Esperar 2 segundos antes de redirigir
       setTimeout(() => {
-        // Usar navigate si está disponible, sino usar window.location
         if (window.navigate) {
           window.navigate('/panel');
         } else {
@@ -58,7 +42,8 @@ function LoginForm() {
       }, 2000);
 
     } catch (error) {
-      setError(error.message);
+      // Axios maneja los errores de red y respuestas no exitosas (4xx, 5xx)
+      setError(error.response?.data?.error || 'Error en la autenticación');
       setSuccess('');
     } finally {
       setLoading(false);
@@ -66,7 +51,6 @@ function LoginForm() {
   };
 
   return (
-    // Esta es la estructura del formulario de inicio de sesión
     <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
       <div className="flex justify-center mb-6">
         <div className="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center">
@@ -78,7 +62,6 @@ function LoginForm() {
 
       <h2 className="text-2xl font-bold text-center mb-6">Iniciar sesión</h2>
 
-      {/* Campos del formulario de inicio de sesion */}
       <form onSubmit={handleSubmit}>
         <div className="mb-4">
           <input
@@ -104,7 +87,6 @@ function LoginForm() {
           />
         </div>
 
-        {/* Nuevo campo para selección de rol */}
         <div className="mb-4">
           <select
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -119,7 +101,6 @@ function LoginForm() {
           </select>
         </div>
 
-        {/* Mensaje de error */}
         {error && (
           <div 
             className="mb-4 p-2 bg-red-100 text-red-700 rounded-md text-center"
@@ -130,7 +111,6 @@ function LoginForm() {
           </div>
         )}
 
-        {/* Mensaje de éxito */}
         {success && (
           <div 
             className="mb-4 p-2 bg-green-100 text-green-700 rounded-md text-center"
@@ -150,7 +130,6 @@ function LoginForm() {
         </button>
       </form>
 
-      {/* Enlaces de registro y recuperación de contraseña */}
       <div className="mt-4 text-center">
         <a href="/UserRegistration" className="text-blue-500 hover:underline">Registrarse</a>
         <span className="mx-2">•</span>

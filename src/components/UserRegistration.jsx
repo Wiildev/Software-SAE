@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import apiClient from '../api/apiClient'; // Importamos el cliente de API
 
 function UserRegistration() {
   // Estados para los campos del formulario
@@ -50,31 +51,10 @@ function UserRegistration() {
     };
 
     try {
-      console.log('Intentando conectar a:', 'http://localhost:3000/api/registro');
-      console.log('Datos a enviar:', userData);
+      // Realizar la petición al servidor con nuestro apiClient
+      const response = await apiClient.post('/registro', userData);
 
-      // Realizar la petición al servidor
-      const response = await fetch('http://localhost:3000/api/registro', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(userData),
-        mode: 'cors',
-        credentials: 'omit'
-      });
-
-      // Imprimir la respuesta completa para depuración
-      console.log('Status:', response.status);
-      console.log('Status Text:', response.statusText);
-      console.log('Headers:', Object.fromEntries(response.headers.entries()));
-
-      const data = await response.json();
-      console.log('Respuesta del servidor:', data);
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Error en el registro');
-      }
+      const data = response.data; // En axios, los datos están en response.data
 
       // Mostrar mensaje de éxito
       setSuccess(data.mensaje || 'Usuario registrado exitosamente');
@@ -91,8 +71,8 @@ function UserRegistration() {
       setAcceptPolicy(false);
       
     } catch (error) {
-      console.error('Error completo:', error);
-      setError(error.message || 'Error al conectar con el servidor');
+      // Axios maneja los errores de forma más consistente
+      setError(error.response?.data?.error || 'Error al conectar con el servidor');
     } finally {
       setLoading(false);
     }
