@@ -53,7 +53,7 @@ class AuthController {
       }
 
       // Validar contraseña
-      const isValidPassword = await this.userModel.validatePassword(password, user.password);
+      const isValidPassword = await this.userModel.validatePassword(password, user.contrasena); // CORREGIDO: user.password -> user.contrasena
       if (!isValidPassword) {
         return res.status(401).json({ mensaje: 'Credenciales inválidas' });
       }
@@ -87,4 +87,4 @@ class AuthController {
   }
 }
 
-module.exports = AuthController; 
+module.exports = AuthController;
