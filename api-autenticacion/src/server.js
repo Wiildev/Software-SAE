@@ -2,6 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const { createPool } = require('./config/database');
+const setupDatabase = require('./config/setupDatabase'); // IMPORTAMOS la función de setup
 
 // Importar rutas
 const rutaUsuario = require('./routes/rutausuario');
@@ -31,6 +32,12 @@ app.use((req, res, next) => {
 
 // Pool de conexiones a la base de datos
 const pool = createPool();
+
+// =================================================================
+// EJECUTAR EL SCRIPT DE CONFIGURACIÓN DE LA BASE DE DATOS
+// Esto asegura que las tablas se creen al iniciar el servidor.
+setupDatabase(pool);
+// =================================================================
 
 // Ruta POST de prueba
 app.post('/api/users', async (req, res) => {
