@@ -3,7 +3,15 @@ class Plaza {
     this.db = db;
   }
 
-  // Buscar plaza por nombre/código
+  // CORREGIDO: Buscar la primera plaza libre disponible
+  async findFreePlaza() {
+    const [rows] = await this.db.query(
+      `SELECT * FROM plaza WHERE estado = 'libre' ORDER BY id_Plaza ASC LIMIT 1`
+    );
+    return rows[0];
+  }
+
+  // Buscar plaza por nombre/código (mantenido por si se usa en otro lado)
   async findByPlaza(plaza) {
     const [rows] = await this.db.query(
       `SELECT * FROM plaza WHERE plaza = ?`,

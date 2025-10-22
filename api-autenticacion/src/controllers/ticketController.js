@@ -11,11 +11,18 @@ class TicketController {
     this.plazaModel = new Plaza(db);
   }
 
-  // Registrar ingreso de vehículo y ticket
+  // Registrar ingreso de vehículo y ticket (CORREGIDO)
   async registrarIngreso(req, res) {
     try {
-      const { placa, tipoVehiculo, plaza, id_Empleado } = req.body;
-      // 1. Buscar o crear vehículo
+      const { placa, tipoVehiculo, id_Empleado } = req.body;
+
+      // 1. Buscar una plaza libre
+      const plazaLibre = await this.plazaModel.findFreePlaza();
+      if (!plazaLibre) {
+        return res.status(400).json({ error: 'No hay plazas disponibles' });
+      }
+
+      // 2. Buscar o crear vehículo
       let vehiculo = await this.vehiculoModel.findByPlaca(placa);
       let id_Placa;
       if (!vehiculo) {
@@ -23,17 +30,26 @@ class TicketController {
       } else {
         id_Placa = vehiculo.id_Placa;
       }
-      // 2. Buscar plaza
-      const plazaObj = await this.plazaModel.findByPlaza(plaza);
-      if (!plazaObj) return res.status(400).json({ error: 'Plaza no encontrada' });
-      // 3. Crear ticket
-      const id_Ticket = await this.ticketModel.create({ id_Plaza: plazaObj.id_Plaza, id_Empleado, id_Placa });
-      // 4. Marcar plaza como ocupada
-      await this.plazaModel.setEstado(plazaObj.id_Plaza, 'ocupado');
-      res.status(201).json({ mensaje: 'Ingreso registrado', id_Ticket });
+
+      // 3. Crear ticket con la plaza encontrada
+      const id_Ticket = await this.ticketModel.create({ 
+        id_Plaza: plazaLibre.id_Plaza, 
+        id_Empleado, 
+        id_Placa 
+      });
+
+      // 4. Marcar la plaza como ocupada
+      await this.plazaModel.setEstado(plazaLibre.id_Plaza, 'ocupado');
+
+      res.status(201).json({ 
+        mensaje: 'Ingreso registrado exitosamente', 
+        ticketId: id_Ticket, 
+        plazaAsignada: plazaLibre.plaza 
+      });
+
     } catch (error) {
       console.error('Error en registrarIngreso:', error);
-      res.status(500).json({ error: 'Error en el servidor' });
+      res.status(500).json({ error: 'Error en el servidor al registrar el ingreso' });
     }
   }
 
