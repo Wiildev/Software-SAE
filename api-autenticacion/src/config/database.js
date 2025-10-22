@@ -28,9 +28,7 @@ const createPool = () => {
   // Valida que las variables de entorno esenciales estén presentes
   if (!dbConfig.host || !dbConfig.user || !dbConfig.password || !dbConfig.port || !dbConfig.database) {
     console.error('Faltan variables de entorno críticas para la base de datos. Asegúrate de que MYSQLHOST, MYSQLUSER, MYSQLPASSWORD, MYSQLPORT y MYSQLDATABASE están definidas.');
-    // En un entorno real, podrías querer que la aplicación no inicie.
-    // process.exit(1);
-    // Por ahora, devolvemos un pool "vacío" para evitar un crash inmediato.
+    // Devolvemos un pool "vacío" para evitar un crash inmediato.
     return {
         getConnection: () => Promise.reject(new Error('Pool de base de datos no configurado debido a variables de entorno faltantes.')),
         query: () => Promise.reject(new Error('Pool de base de datos no configurado.'))

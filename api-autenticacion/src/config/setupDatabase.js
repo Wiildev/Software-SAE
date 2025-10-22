@@ -1,1 +1,119 @@
-const mysql = require(\'mysql2/promise\');\n// Importamos la configuración INICIAL (sin DB) y el nombre de la DB desde las variables de entorno\nconst { initialDbConfig } = require(\'./database\');\nconst dbName = process.env.MYSQLDATABASE;\n\nasync function setupDatabase() {\n    let connection;\n\n    if (!dbName) {\n        console.error(\'❌ La variable de entorno MYSQLDATABASE no está definida. No se puede continuar.\');\n        throw new Error(\'MYSQLDATABASE no está definida.\');\n    }\n    \n    try {\n        // Paso 1: Conectarse al servidor MySQL SIN especificar una base de datos\n        connection = await mysql.createConnection(initialDbConfig);\n        console.log(\'🔌 Conectado a MySQL para la configuración inicial.\');\n\n        // Paso 2: Crear la base de datos usando la variable de entorno\n        await connection.query(`CREATE DATABASE IF NOT EXISTS \`${dbName}\``);\n        console.log(`✅ Base de datos \"${dbName}\" verificada o creada.`);\n\n        // Paso 3: Seleccionar la base de datos recién creada para las operaciones siguientes\n        await connection.query(`USE \`${dbName}\``);\n\n        // Paso 4: Crear la tabla de empleados\n        await connection.execute(`\n            CREATE TABLE IF NOT EXISTS empleado (\n                id_Empleado INT AUTO_INCREMENT PRIMARY KEY,\n                nombreCompleto VARCHAR(255) NOT NULL,\n                nombreUsuario VARCHAR(100) UNIQUE NOT NULL,\n                numeroDocumento VARCHAR(50) NOT NULL,\n                correoElectronico VARCHAR(255) UNIQUE NOT NULL, \n                tipoUsuario ENUM(\'Admin\', \'Emple\') NOT NULL,\n                telefono VARCHAR(20),\n                contrasena VARCHAR(255) NOT NULL,\n                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n            )\n        `);\n        console.log(\'-> Tabla \"empleado\" verificada o creada.\');\n\n        // Paso 5: Crear la tabla de plazas\n        await connection.execute(`\n            CREATE TABLE IF NOT EXISTS plaza (\n                id_Plaza INT AUTO_INCREMENT PRIMARY KEY,\n                plaza VARCHAR(50) NOT NULL,\n                estado ENUM(\'libre\', \'ocupado\') DEFAULT \'libre\',\n                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n            )\n        `);\n        console.log(\'-> Tabla \"plaza\" verificada o creada.\');\n\n        // ... (El resto de las tablas siguen el mismo patrón)\n\n        await connection.execute(`\n            CREATE TABLE IF NOT EXISTS vehiculo (\n                id_Placa INT AUTO_INCREMENT PRIMARY KEY,\n                placa VARCHAR(20) UNIQUE NOT NULL,\n                tipoVehiculo ENUM(\'CARRO\', \'MOTO\', \'BICICLETA\') NOT NULL,\n                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n            )\n        `);\n        console.log(\'-> Tabla \"vehiculo\" verificada o creada.\');\n\n        await connection.execute(`\n            CREATE TABLE IF NOT EXISTS ticket (\n                id_Ticket INT AUTO_INCREMENT PRIMARY KEY,\n                id_Plaza INT NOT NULL,\n                id_Empleado INT NOT NULL,\n                id_placa INT NOT NULL,\n                fechaIngreso DATE NOT NULL,\n                horaIngreso TIME NOT NULL,\n                fechaSalida DATE NULL,\n                horaSalida TIME NULL,\n                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n                FOREIGN KEY (id_Plaza) REFERENCES plaza(id_Plaza),\n                FOREIGN KEY (id_Empleado) REFERENCES empleado(id_Empleado),\n                FOREIGN KEY (id_placa) REFERENCES vehiculo(id_Placa)\n            )\n        `);\n        console.log(\'-> Tabla \"ticket\" verificada o creada.\');\n\n        // Paso 6: Poblar las plazas si la tabla está vacía\n        const [plazaCount] = await connection.execute(\'SELECT COUNT(*) as count FROM plaza\');\n        if (plazaCount[0].count === 0) {\n            console.log(\'Insertando plazas de ejemplo...\');\n            for (let i = 1; i <= 50; i++) {\n                const nombrePlaza = `P${String(i).padStart(3, \'0\')}`;\n                await connection.execute(\n                    \'INSERT INTO plaza (plaza, estado) VALUES (?, ?)\',\n                    [nombrePlaza, \'libre\']\n                );\n            }\n            console.log(\'-> 50 plazas de ejemplo insertadas.\');\n        }\n\n        console.log(\'🎉 Configuración de la base de datos completada con éxito.\');\n\n    } catch (error) {\n        console.error(\'💥 Error crítico durante la configuración de la base de datos:\', error);\n        // Es crucial lanzar el error para que el proceso de arranque del servidor se detenga\n        throw error;\n    } finally {\n        if (connection) {\n            await connection.end();\n            console.log(\'🔌 Conexión de configuración cerrada.\');\n        }\n    }\n}\n\n// Si el script se ejecuta directamente, lo corre.\nif (require.main === module) {\n    setupDatabase()\n        .then(() => {\n            process.exit(0);\n        })\n        .catch(() => {\n            process.exit(1);\n        });\n}\n\nmodule.exports = { setupDatabase };
+const mysql = require('mysql2/promise');
+// Importamos la configuración INICIAL (sin DB) y el nombre de la DB desde las variables de entorno
+const { initialDbConfig } = require('./database');
+const dbName = process.env.MYSQLDATABASE;
+
+async function setupDatabase() {
+    let connection;
+
+    if (!dbName) {
+        console.error('❌ La variable de entorno MYSQLDATABASE no está definida. No se puede continuar.');
+        throw new Error('MYSQLDATABASE no está definida.');
+    }
+    
+    try {
+        // Paso 1: Conectarse al servidor MySQL SIN especificar una base de datos
+        connection = await mysql.createConnection(initialDbConfig);
+        console.log('🔌 Conectado a MySQL para la configuración inicial.');
+
+        // Paso 2: Crear la base de datos usando la variable de entorno
+        await connection.query(`CREATE DATABASE IF NOT EXISTS \`${dbName}\``);
+        console.log(`✅ Base de datos \"${dbName}\" verificada o creada.`);
+
+        // Paso 3: Seleccionar la base de datos recién creada para las operaciones siguientes
+        await connection.query(`USE \`${dbName}\``);
+
+        // Paso 4: Crear la tabla de empleados
+        await connection.execute(`
+            CREATE TABLE IF NOT EXISTS empleado (
+                id_Empleado INT AUTO_INCREMENT PRIMARY KEY,
+                nombreCompleto VARCHAR(255) NOT NULL,
+                nombreUsuario VARCHAR(100) UNIQUE NOT NULL,
+                numeroDocumento VARCHAR(50) NOT NULL,
+                correoElectronico VARCHAR(255) UNIQUE NOT NULL, 
+                tipoUsuario ENUM('Admin', 'Emple') NOT NULL,
+                telefono VARCHAR(20),
+                contrasena VARCHAR(255) NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+        console.log('-> Tabla \"empleado\" verificada o creada.');
+
+        // Paso 5: Crear la tabla de plazas
+        await connection.execute(`
+            CREATE TABLE IF NOT EXISTS plaza (
+                id_Plaza INT AUTO_INCREMENT PRIMARY KEY,
+                plaza VARCHAR(50) NOT NULL,
+                estado ENUM('libre', 'ocupado') DEFAULT 'libre',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+        console.log('-> Tabla \"plaza\" verificada o creada.');
+
+        await connection.execute(`
+            CREATE TABLE IF NOT EXISTS vehiculo (
+                id_Placa INT AUTO_INCREMENT PRIMARY KEY,
+                placa VARCHAR(20) UNIQUE NOT NULL,
+                tipoVehiculo ENUM('CARRO', 'MOTO', 'BICICLETA') NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+        console.log('-> Tabla \"vehiculo\" verificada o creada.');
+
+        await connection.execute(`
+            CREATE TABLE IF NOT EXISTS ticket (
+                id_Ticket INT AUTO_INCREMENT PRIMARY KEY,
+                id_Plaza INT NOT NULL,
+                id_Empleado INT NOT NULL,
+                id_placa INT NOT NULL,
+                fechaIngreso DATE NOT NULL,
+                horaIngreso TIME NOT NULL,
+                fechaSalida DATE NULL,
+                horaSalida TIME NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (id_Plaza) REFERENCES plaza(id_Plaza),
+                FOREIGN KEY (id_Empleado) REFERENCES empleado(id_Empleado),
+                FOREIGN KEY (id_placa) REFERENCES vehiculo(id_Placa)
+            )
+        `);
+        console.log('-> Tabla \"ticket\" verificada o creada.');
+
+        // Paso 6: Poblar las plazas si la tabla está vacía
+        const [plazaCount] = await connection.execute('SELECT COUNT(*) as count FROM plaza');
+        if (plazaCount[0].count === 0) {
+            console.log('Insertando plazas de ejemplo...');
+            for (let i = 1; i <= 50; i++) {
+                const nombrePlaza = `P${String(i).padStart(3, '0')}`;
+                await connection.execute(
+                    'INSERT INTO plaza (plaza, estado) VALUES (?, ?)',
+                    [nombrePlaza, 'libre']
+                );
+            }
+            console.log('-> 50 plazas de ejemplo insertadas.');
+        }
+
+        console.log('🎉 Configuración de la base de datos completada con éxito.');
+
+    } catch (error) {
+        console.error('💥 Error crítico durante la configuración de la base de datos:', error);
+        throw error;
+    } finally {
+        if (connection) {
+            await connection.end();
+            console.log('🔌 Conexión de configuración cerrada.');
+        }
+    }
+}
+
+// Si el script se ejecuta directamente, lo corre.
+if (require.main === module) {
+    setupDatabase()
+        .then(() => {
+            process.exit(0);
+        })
+        .catch(() => {
+            process.exit(1);
+        });
+}
+
+module.exports = { setupDatabase };
