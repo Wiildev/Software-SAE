@@ -2,7 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const { createPool } = require('./config/database');
-const setupDatabase = require('./config/setupDatabase'); // IMPORTAMOS la función de setup
+const { setupDatabase } = require('./config/setupDatabase'); // CORREGIDO: Importación con desestructuración
 
 // Importar rutas
 const rutaUsuario = require('./routes/rutausuario');
