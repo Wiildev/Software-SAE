@@ -33,20 +33,20 @@ router.post('/login', async (req, res) => {
                 return res.status(401).json({ error: 'Usuario o contraseña incorrectos' });
             }
             
-            let normalizedRole = role;
-            if (role === 'Administrador') {
-                normalizedRole = 'Admin';
-            } else if (role === 'Empleado') {
-                normalizedRole = 'Emple';
-            }
+            // Convertir ambos roles a minúsculas para una comparación insensible a mayúsculas/minúsculas.
+            const roleFromDB = user.tipoUsuario.toLowerCase(); // ej: 'admin'
+            const roleFromForm = role.toLowerCase();        // ej: 'administrador' o 'admin'
 
-            // LOGS DE DEPURACIÓN
-            console.log(`[DEBUG] Rol del Formulario: "${role}"`);
-            console.log(`[DEBUG] Rol de la BD: "${user.tipoUsuario}"`);
-            console.log(`[DEBUG] Rol Normalizado para Comparación: "${normalizedRole}"`);
-
-            if(user.tipoUsuario !== normalizedRole){
-                console.error(`[AUTH_FAILURE] Falla de rol para "${username}". BD: "${user.tipoUsuario}", Recibido: "${normalizedRole}"`);
+            // Comprobar si el rol de la base de datos coincide con el del formulario
+            // Se permite que "admin" (DB) coincida con "admin" o "administrador" (FORM)
+            // y que "emple" (DB) coincida con "empleado" (FORM)
+            if (roleFromDB === 'admin' && (roleFromForm === 'admin' || roleFromForm === 'administrador')) {
+                // Es Admin, la comprobación es correcta
+            } else if (roleFromDB === 'emple' && (roleFromForm === 'emple' || roleFromForm === 'empleado')) {
+                // Es Empleado, la comprobación es correcta
+            } else {
+                // Si ninguna de las condiciones anteriores se cumple, los roles no coinciden.
+                console.error(`[AUTH_FAILURE] Falla de rol para "${username}". BD: "${user.tipoUsuario}", Formulario: "${role}"`);
                 return res.status(401).json({ error: 'Rol incorrecto para este usuario' });
             }
 
