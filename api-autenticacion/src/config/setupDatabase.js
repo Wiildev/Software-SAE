@@ -13,11 +13,11 @@ async function setupDatabase() {
         console.log('Conectado a MySQL');
 
         // Crear base de datos si no existe
-        await connection.execute(`CREATE DATABASE IF NOT EXISTS sae_software`);
+        await connection.query(`CREATE DATABASE IF NOT EXISTS sae_software`); // Usar query para compatibilidad
         console.log('Base de datos sae_software verificada/creada');
 
         // Usar la base de datos
-        await connection.execute(`USE sae_software`);
+        await connection.query(`USE sae_software`); // CORREGIDO: Usar query en lugar de execute
 
         // Crear tabla empleado si no existe (debe ir primero por las FK)
         await connection.execute(`
