@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const bcrypt = require('bcrypt');
 const { createPool } = require('../config/database');
 const pool = createPool();
 
@@ -8,39 +9,34 @@ router.post('/login', async (req, res) => {
     try {
         const { username, password, role } = req.body;
 
-        // Validar que todos los campos estén presentes
         if (!username || !password || !role) {
-            return res.status(400).json({
-                error: 'Todos los campos son requeridos'
-            });
+            return res.status(400).json({ error: 'Todos los campos son requeridos' });
         }
 
         const connection = await pool.getConnection();
 
         try {
-            // Buscar el usuario por nombre de usuario y rol
             const [users] = await connection.query(
-                'SELECT * FROM empleado WHERE nombreUsuario = ? AND tipoUsuario = ?',
-                [username, role]
+                'SELECT * FROM empleado WHERE nombreUsuario = ?',
+                [username]
             );
 
-            // Si no se encuentra el usuario
             if (users.length === 0) {
-                return res.status(401).json({
-                    error: 'Usuario, rol o contraseña incorrectos'
-                });
+                return res.status(401).json({ error: 'Usuario o contraseña incorrectos' });
             }
 
             const user = users[0];
 
-            // Verificar la contraseña
-            if (password !== user.contrasena) {
-                return res.status(401).json({
-                    error: 'Usuario, rol o contraseña incorrectos'
-                });
+            const isPasswordValid = await bcrypt.compare(password, user.contrasena);
+
+            if (!isPasswordValid) {
+                return res.status(401).json({ error: 'Usuario o contraseña incorrectos' });
+            }
+            
+            if(user.tipoUsuario !== role){
+                return res.status(401).json({ error: 'Rol incorrecto para este usuario' });
             }
 
-            // Si todo es correcto, devolver los datos del usuario (excepto la contraseña)
             const { contrasena, ...userWithoutPassword } = user;
             
             res.json({
@@ -50,17 +46,13 @@ router.post('/login', async (req, res) => {
 
         } catch (error) {
             console.error('Error en la consulta:', error);
-            res.status(500).json({
-                error: 'Error al procesar la solicitud'
-            });
+            res.status(500).json({ error: 'Error al procesar la solicitud' });
         } finally {
             connection.release();
         }
     } catch (error) {
         console.error('Error en el login:', error);
-        res.status(500).json({
-            error: 'Error en el servidor'
-        });
+        res.status(500).json({ error: 'Error en el servidor' });
     }
 });
 
@@ -72,34 +64,33 @@ router.post('/registro', async (req, res) => {
             username,
             documentNumber,
             email,
-            role,
             phoneNumber,
             password
         } = req.body;
 
-        // Validar que todos los campos requeridos estén presentes
-        if (!fullName || !username || !documentNumber || !email || !role || !phoneNumber || !password) {
-            return res.status(400).json({
-                error: 'Todos los campos son requeridos'
-            });
+        if (!fullName || !username || !documentNumber || !email || !phoneNumber || !password) {
+            return res.status(400).json({ error: 'Todos los campos son requeridos' });
         }
 
         const connection = await pool.getConnection();
         
         try {
-            // Verificar si el usuario ya existe
             const [existingUsers] = await connection.query(
                 'SELECT * FROM empleado WHERE correoElectronico = ? OR nombreUsuario = ?',
                 [email, username]
             );
 
             if (existingUsers.length > 0) {
-                return res.status(400).json({
-                    error: 'El email o nombre de usuario ya está registrado'
-                });
+                return res.status(400).json({ error: 'El email o nombre de usuario ya está registrado' });
             }
 
-            // Insertar el nuevo empleado
+            const [userCountResult] = await connection.query('SELECT COUNT(*) as count FROM empleado');
+            const userCount = userCountResult[0].count;
+            
+            const role = userCount === 0 ? 'Admin' : 'Emple';
+
+            const hashedPassword = await bcrypt.hash(password, 10);
+
             const [result] = await connection.query(
                 `INSERT INTO empleado (
                     nombreCompleto,
@@ -110,28 +101,25 @@ router.post('/registro', async (req, res) => {
                     telefono,
                     contrasena
                 ) VALUES (?, ?, ?, ?, ?, ?, ?)`,
-                [fullName, username, documentNumber, email, role, phoneNumber, password]
+                [fullName, username, documentNumber, email, role, phoneNumber, hashedPassword]
             );
 
             res.status(201).json({
                 mensaje: 'Usuario registrado exitosamente',
-                userId: result.insertId
+                userId: result.insertId,
+                role: role
             });
 
         } catch (error) {
             console.error('Error en la consulta:', error);
-            res.status(500).json({
-                error: 'Error al registrar el usuario'
-            });
+            res.status(500).json({ error: 'Error al registrar el usuario' });
         } finally {
             connection.release();
         }
     } catch (error) {
         console.error('Error en el registro:', error);
-        res.status(500).json({
-            error: 'Error en el servidor'
-        });
+        res.status(500).json({ error: 'Error en el servidor' });
     }
 });
 
-module.exports = router; 
+module.exports = router;
