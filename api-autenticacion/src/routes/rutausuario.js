@@ -33,9 +33,6 @@ router.post('/login', async (req, res) => {
                 return res.status(401).json({ error: 'Usuario o contraseña incorrectos' });
             }
             
-            // Normaliza el rol del frontend para que coincida con la base de datos
-            // Frontend: "Administrador" -> DB: "Admin"
-            // Frontend: "Empleado" -> DB: "Emple"
             let normalizedRole = role;
             if (role === 'Administrador') {
                 normalizedRole = 'Admin';
@@ -43,7 +40,13 @@ router.post('/login', async (req, res) => {
                 normalizedRole = 'Emple';
             }
 
+            // LOGS DE DEPURACIÓN
+            console.log(`[DEBUG] Rol del Formulario: "${role}"`);
+            console.log(`[DEBUG] Rol de la BD: "${user.tipoUsuario}"`);
+            console.log(`[DEBUG] Rol Normalizado para Comparación: "${normalizedRole}"`);
+
             if(user.tipoUsuario !== normalizedRole){
+                console.error(`[AUTH_FAILURE] Falla de rol para "${username}". BD: "${user.tipoUsuario}", Recibido: "${normalizedRole}"`);
                 return res.status(401).json({ error: 'Rol incorrecto para este usuario' });
             }
 
