@@ -6,7 +6,7 @@ class Plaza {
   // Buscar plaza por nombre/código
   async findByPlaza(plaza) {
     const [rows] = await this.db.query(
-      `SELECT * FROM Plaza WHERE plaza = ?`,
+      `SELECT * FROM plaza WHERE plaza = ?`,
       [plaza]
     );
     return rows[0];
@@ -15,10 +15,10 @@ class Plaza {
   // Cambiar estado de la plaza
   async setEstado(id_Plaza, estado) {
     await this.db.query(
-      `UPDATE Plaza SET estado = ? WHERE id_Plaza = ?`,
+      `UPDATE plaza SET estado = ? WHERE id_Plaza = ?`,
       [estado, id_Plaza]
     );
   }
 }
 
-module.exports = Plaza; 
+module.exports = Plaza;
