@@ -1,30 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import apiClient from '../../api/apiClient'; // Ajustada la ruta de importación
+import React, { useState } from 'react';
+import apiClient from '../../api/apiClient';
 import { FaFilter, FaSearch, FaPrint, FaUndo, FaTrash } from 'react-icons/fa';
 
-function TableVehicle({ reload, onReload }) {
-  const [vehicles, setVehicles] = useState([]);
+// Recibe vehicles, onReload y error como props
+function TableVehicle({ vehicles = [], onReload, error }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [showFilters, setShowFilters] = useState(false);
-  const [error, setError] = useState(null);
 
-  // Cargar los tickets con detalles al montar el componente o cuando reload cambie
-  const fetchTicketsWithDetails = async () => {
-    try {
-      const response = await apiClient.get('/tickets/detalles');
-      setVehicles(response.data.tickets || []);
-      if (onReload) onReload();
-    } catch (err) {
-      setError('Error al cargar los datos');
-      console.error(err);
-    }
-  };
+  // Ya no se necesita fetchTicketsWithDetails ni el useEffect para cargar datos
 
-  useEffect(() => {
-    fetchTicketsWithDetails();
-  }, [reload]);
-
-  // Función para imprimir el ticket (sin cambios, ya que no hace llamada a la API)
+  // Función para imprimir el ticket (sin cambios)
   const printTicket = (vehicle) => {
     const ticketContent = `
       <!DOCTYPE html>
@@ -69,38 +54,37 @@ function TableVehicle({ reload, onReload }) {
     };
   };
 
-  // Eliminar ticket
+  // Eliminar ticket y llamar a onReload
   const removeVehicle = async (id_Ticket) => {
     if (!window.confirm('¿Está seguro de eliminar el registro?')) return;
     try {
       await apiClient.delete(`/tickets/${id_Ticket}`);
-      setVehicles(vehicles.filter(v => v.id_Ticket !== id_Ticket));
-      if (onReload) onReload();
+      onReload(); // Llama a onReload para que App.jsx recargue los datos
     } catch (error) {
       alert('Error al eliminar el registro.');
       console.error(error);
     }
   };
 
-  // Marcar salida
+  // Marcar salida y llamar a onReload
   const markAsExited = async (id_Ticket) => {
     try {
       await apiClient.put(`/tickets/${id_Ticket}/salida`);
-      fetchTicketsWithDetails(); // Recargar la lista
-      if (onReload) onReload();
+      onReload(); // Llama a onReload para que App.jsx recargue los datos
     } catch (error) {
       alert('Error al marcar la salida.');
       console.error(error);
     }
   };
 
-  // Filtrar los datos según el término de búsqueda
   const filteredData = vehicles.filter(vehicle => 
-    vehicle.placa.toLowerCase().includes(searchTerm.toLowerCase())
+    vehicle.placa && vehicle.placa.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const getTipoBackgroundColor = (tipo) => {
-    switch (tipo) {
+    if (!tipo) return 'bg-gray-100 text-gray-700';
+    const upperTipo = tipo.toUpperCase();
+    switch (upperTipo) {
       case 'CARRO': return 'bg-blue-100 text-blue-700';
       case 'MOTO': return 'bg-purple-100 text-purple-700';
       case 'BICICLETA': return 'bg-orange-100 text-orange-700';
@@ -127,6 +111,7 @@ function TableVehicle({ reload, onReload }) {
   };
 
   const getPlacaBackgroundColor = (placa) => {
+    if (!placa) return 'bg-gray-100 text-gray-700';
     if (placa.startsWith('BV')) return 'bg-green-100 text-green-700';
     if (placa.startsWith('HT') || placa.startsWith('HF')) return 'bg-blue-100 text-blue-700';
     return 'bg-gray-100 text-gray-700';

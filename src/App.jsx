@@ -9,12 +9,33 @@ import TableVehicle from './components/PanelComponents/TableVehicle';
 import Account from './components/Account';
 import Report from './components/Report';
 import Statistics from './components/Statistics';
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
+import apiClient from './api/apiClient'; // Importa apiClient
 
 function App() {
-  // Estado y función de recarga para vehículos
-  const [reloadTable, setReloadTable] = useState(false);
-  const handleReloadTable = useCallback(() => setReloadTable(r => !r), []);
+  const [reload, setReload] = useState(false);
+  const handleReload = useCallback(() => setReload(r => !r), []);
+
+  // Estado centralizado para la lista de vehículos
+  const [vehicles, setVehicles] = useState([]);
+  const [error, setError] = useState(null);
+
+  // useEffect para obtener los datos de los vehículos cuando 'reload' cambie
+  useEffect(() => {
+    const fetchVehicles = async () => {
+      try {
+        setError(null);
+        const response = await apiClient.get('/tickets/detalles');
+        setVehicles(response.data.tickets || []);
+      } catch (err) {
+        setError('Error al cargar los datos de vehículos');
+        console.error(err);
+        setVehicles([]); // Asegurar que vehicles es un array vacío en caso de error
+      }
+    };
+
+    fetchVehicles();
+  }, [reload]);
 
   return (
     <Router>
@@ -48,14 +69,20 @@ function App() {
               <div className="container mx-auto px-4 py-8">
                 <div className="flex flex-col gap-8">
                   <div className="w-full">
-                    <VehicleCards reload={reloadTable} />
+                    {/* Pasa la lista de vehículos directamente */}
+                    <VehicleCards vehicles={vehicles} />
                   </div>
                   <div className="flex flex-col md:flex-row gap-8">
                     <div className="w-full md:w-1/3">
-                      <RegistroVehicleForm onRegister={handleReloadTable} />
+                      <RegistroVehicleForm onRegister={handleReload} />
                     </div>
                     <div className="w-full md:w-2/3">
-                      <TableVehicle reload={reloadTable} onReload={handleReloadTable} />
+                      {/* Pasa la lista de vehículos y el manejador de recarga */}
+                      <TableVehicle 
+                        vehicles={vehicles} 
+                        onReload={handleReload}
+                        error={error} 
+                      />
                     </div>
                   </div>
                 </div>
