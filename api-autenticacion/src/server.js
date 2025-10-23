@@ -1,3 +1,5 @@
+process.env.TZ = 'America/Bogota'; // Establece la zona horaria para todo el proceso
+
 const express = require('express');
 const cors = require('cors');
 const { setupDatabase } = require('./config/setupDatabase');
