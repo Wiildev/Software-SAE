@@ -26,15 +26,16 @@ function Card({ title, count, color, icon, borderColor }) {
 // Componente principal que recibe los vehículos como prop
 function VehicleCards({ vehicles = [] }) { // Se asigna un array vacío por defecto
 
-  // Contar vehículos actualmente en el estacionamiento (estado = 'ocupado')
-  // Se añade una verificación para asegurar que v.estado exista antes de comparar
-  const activeVehicles = vehicles.filter(v => v.estado && v.estado.toUpperCase() === 'OCUPADO');
+  // CORRECCIÓN: Contar vehículos que no tienen fecha de salida (están activamente en el parqueo)
+  const activeVehicles = vehicles.filter(v => !v.fechaSalida);
 
-  // Contar por tipo de vehículo (insensible a mayúsculas/minúsculas)
+  // Contar por tipo de vehículo (insensible a mayúsculas/minúsculas) de los vehículos activos
   const carCount = activeVehicles.filter(v => v.tipoVehiculo && v.tipoVehiculo.toUpperCase() === 'CARRO').length;
   const motoCount = activeVehicles.filter(v => v.tipoVehiculo && v.tipoVehiculo.toUpperCase() === 'MOTO').length;
   const bikeCount = activeVehicles.filter(v => v.tipoVehiculo && v.tipoVehiculo.toUpperCase() === 'BICICLETA').length;
-  const totalCount = carCount + motoCount + bikeCount;
+  
+  // CORRECCIÓN: El total es simplemente el número de vehículos activos
+  const totalCount = activeVehicles.length;
 
   return (
     <div className="w-full p-4">
