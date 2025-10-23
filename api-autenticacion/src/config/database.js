@@ -9,6 +9,7 @@ const dbConfig = {
   password: process.env.MYSQLPASSWORD,
   database: process.env.MYSQLDATABASE,
   port: process.env.MYSQLPORT,
+  timezone: 'America/Bogota', // Añadido para asegurar la zona horaria correcta
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0
@@ -21,6 +22,7 @@ const initialDbConfig = {
     user: process.env.MYSQLUSER,
     password: process.env.MYSQLPASSWORD,
     port: process.env.MYSQLPORT,
+    timezone: 'America/Bogota', // Añadido para consistencia
 };
 
 // El pool de conexiones que usará la aplicación en su día a día.

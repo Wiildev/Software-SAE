@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import apiClient from '../../api/apiClient';
 import { FaCar, FaMotorcycle, FaBiking } from 'react-icons/fa';
 
@@ -6,8 +6,14 @@ function RegistroVehicleForm({ onRegister }) {
   const [placa, setPlaca] = useState('');
   const [tipoVehiculo, setTipoVehiculo] = useState('');
   const [plaza, setPlaza] = useState('');
+  const [currentTime, setCurrentTime] = useState(new Date());
 
-  // Se elimina el estado y el efecto para el reloj en tiempo real para evitar confusión con la hora del servidor.
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   const handlePlacaChange = (e) => {
     setPlaca(e.target.value.toUpperCase());
@@ -54,8 +60,6 @@ function RegistroVehicleForm({ onRegister }) {
       setPlaca('');
       setTipoVehiculo('');
       setPlaza('');
-      // FIX: Se elimina la llamada a onRegister() para prevenir la doble recarga de datos.
-      // El componente TableVehicle ya se encarga de llamar a onReload, que actualiza la lista.
       if (onRegister) onRegister();
 
     } catch (error) {
@@ -64,8 +68,24 @@ function RegistroVehicleForm({ onRegister }) {
     }
   };
 
+  // Helper function to format the time to match the design
+  const formatTimeParts = (date) => {
+    let hours = date.getHours();
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const seconds = String(date.getSeconds()).padStart(2, '0');
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12;
+    hours = hours ? hours : 12; // Hour '0' should be '12'
+    const formattedHours = String(hours).padStart(2, '0');
+    return {
+        time: `${formattedHours}:${minutes}:${seconds}`,
+        ampm: ampm
+    };
+  };
+
+  const { time, ampm } = formatTimeParts(currentTime);
+
   return (
-    // Se ajusta la altura para que sea flexible si el contenido cambia
     <div className="bg-white rounded-lg shadow-md p-6 max-w-sm mx-auto flex flex-col justify-between">
       <h2 className="text-xl font-bold text-center mb-6">INGRESO DE VEHÍCULOS</h2>
       <form onSubmit={handleSubmit} className="flex flex-col flex-grow justify-between">
@@ -119,7 +139,17 @@ function RegistroVehicleForm({ onRegister }) {
           </button>
         </div>
       </form>
-      {/* Se elimina el contenedor del reloj */}
+      {/* New Clock Design */}
+      <div className="bg-gray-100 rounded-lg p-4 mt-4">
+        <div className="flex items-baseline justify-center space-x-2">
+          <span className="text-4xl font-mono font-bold text-gray-900 tracking-wider">
+            {time}
+          </span>
+          <span className="bg-blue-500 text-white text-md font-semibold px-2.5 py-1 rounded">
+            {ampm}
+          </span>
+        </div>
+      </div>
     </div>
   );
 }
