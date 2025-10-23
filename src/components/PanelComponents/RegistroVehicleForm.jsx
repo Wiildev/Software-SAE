@@ -1,30 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import apiClient from '../../api/apiClient'; // Ajustada la ruta de importación
+import React, { useState } from 'react';
+import apiClient from '../../api/apiClient';
 import { FaCar, FaMotorcycle, FaBiking } from 'react-icons/fa';
 
 function RegistroVehicleForm({ onRegister }) {
   const [placa, setPlaca] = useState('');
   const [tipoVehiculo, setTipoVehiculo] = useState('');
-  const [currentTime, setCurrentTime] = useState('');
-  const [amPm, setAmPm] = useState('AM');
   const [plaza, setPlaza] = useState('');
 
-  // Actualizar la hora cada segundo
-  useEffect(() => {
-    const timer = setInterval(() => {
-      const date = new Date();
-      let hours = date.getHours();
-      const minutes = date.getMinutes().toString().padStart(2, '0');
-      const seconds = date.getSeconds().toString().padStart(2, '0');
-      const isAm = hours < 12;
-      setAmPm(isAm ? 'AM' : 'PM');
-      hours = hours % 12;
-      hours = hours ? hours : 12;
-      hours = hours.toString().padStart(2, '0');
-      setCurrentTime(`${hours}:${minutes}:${seconds}`);
-    }, 1000);
-    return () => clearInterval(timer);
-  }, []);
+  // Se elimina el estado y el efecto para el reloj en tiempo real para evitar confusión con la hora del servidor.
 
   const handlePlacaChange = (e) => {
     setPlaca(e.target.value.toUpperCase());
@@ -39,7 +22,6 @@ function RegistroVehicleForm({ onRegister }) {
     setPlaza(`${area} ${number}`);
   };
 
-  // Obtener el id_Empleado del usuario logueado desde localStorage
   const getEmpleadoId = () => {
     try {
       const user = JSON.parse(localStorage.getItem('user'));
@@ -49,7 +31,6 @@ function RegistroVehicleForm({ onRegister }) {
     }
   };
 
-  // Enviar los datos al backend para registrar el ingreso
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!placa || !tipoVehiculo) {
@@ -63,28 +44,29 @@ function RegistroVehicleForm({ onRegister }) {
     }
 
     try {
-      const response = await apiClient.post('/tickets', {
+      await apiClient.post('/tickets', {
         placa,
         tipoVehiculo: tipoVehiculo.toUpperCase(),
         plaza,
         id_Empleado
       });
 
-      // Si la petición es exitosa (status 2xx)
       setPlaca('');
       setTipoVehiculo('');
       setPlaza('');
-      if (onRegister) onRegister(); // Notificar al padre para recargar la tabla
-    
+      // FIX: Se elimina la llamada a onRegister() para prevenir la doble recarga de datos.
+      // El componente TableVehicle ya se encarga de llamar a onReload, que actualiza la lista.
+      if (onRegister) onRegister();
+
     } catch (error) {
-      // Axios encapsula el error en error.response
       const errorMessage = error.response?.data?.error || 'No se pudo registrar el vehículo';
       alert('Error: ' + errorMessage);
     }
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6 max-w-sm mx-auto h-[calc(100vh-240px)] flex flex-col justify-between">
+    // Se ajusta la altura para que sea flexible si el contenido cambia
+    <div className="bg-white rounded-lg shadow-md p-6 max-w-sm mx-auto flex flex-col justify-between">
       <h2 className="text-xl font-bold text-center mb-6">INGRESO DE VEHÍCULOS</h2>
       <form onSubmit={handleSubmit} className="flex flex-col flex-grow justify-between">
         <div className="space-y-8">
@@ -137,14 +119,7 @@ function RegistroVehicleForm({ onRegister }) {
           </button>
         </div>
       </form>
-      <div className="text-center mt-2">
-        <div className="flex items-center justify-center bg-gray-200  py-2 px-4 rounded-lg shadow-sm">
-          <div className="text-4xl font-mono text-black">{currentTime}</div>
-          <div className="ml-2 bg-blue-500 text-white text-sm font-bold px-2.5 py-1 rounded">
-            {amPm}
-          </div>
-        </div>
-      </div>
+      {/* Se elimina el contenedor del reloj */}
     </div>
   );
 }
