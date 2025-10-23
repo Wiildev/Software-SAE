@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from 'react';
-// import { useVehicles } from '../../context/VehicleContext'; // Ya no se usa
 
 function Card({ title, count, color, icon, borderColor }) {
-  // Mapeo de colores para los diferentes tipos de tarjetas
   const colorClasses = {
     blue: 'bg-blue-500',
     purple: 'bg-purple-600',
@@ -10,7 +8,6 @@ function Card({ title, count, color, icon, borderColor }) {
     green: 'bg-green-500'
   };
 
-  // Obtener la clase de color correspondiente o usar azul por defecto
   const bgColorClass = colorClasses[color] || colorClasses.blue;
 
   return (
@@ -26,23 +23,32 @@ function Card({ title, count, color, icon, borderColor }) {
   );
 }
 
-// Componente que muestra todas las tarjetas de vehículos
 function VehicleCards({ reload }) {
   const [vehicles, setVehicles] = useState([]);
 
   useEffect(() => {
-    fetch('http://localhost:3000/api/tickets/detalles')
-      .then(res => res.json())
-      .then(data => setVehicles(data.tickets || []));
+    // Usar una URL relativa para que funcione en cualquier entorno
+    fetch('/api/tickets/detalles')
+      .then(res => {
+        if (!res.ok) {
+          throw new Error('Error al obtener los datos de vehículos');
+        }
+        return res.json();
+      })
+      .then(data => setVehicles(data.tickets || []))
+      .catch(error => {
+        console.error("Error en fetch de VehicleCards:", error);
+        setVehicles([]); // En caso de error, asegurar que sea un array vacío
+      });
   }, [reload]);
 
   // Contar vehículos actualmente en el estacionamiento (estado = 'ocupado')
-  const activeVehicles = vehicles.filter(v => v.estado === 'ocupado');
+  const activeVehicles = vehicles.filter(v => v.estado && v.estado.toUpperCase() === 'OCUPADO');
 
-  // Contar por tipo de vehículo
-  const carCount = activeVehicles.filter(v => v.tipoVehiculo === 'CARRO').length;
-  const motoCount = activeVehicles.filter(v => v.tipoVehiculo === 'MOTO').length;
-  const bikeCount = activeVehicles.filter(v => v.tipoVehiculo === 'BICICLETA').length;
+  // Contar por tipo de vehículo (insensible a mayúsculas/minúsculas)
+  const carCount = activeVehicles.filter(v => v.tipoVehiculo && v.tipoVehiculo.toUpperCase() === 'CARRO').length;
+  const motoCount = activeVehicles.filter(v => v.tipoVehiculo && v.tipoVehiculo.toUpperCase() === 'MOTO').length;
+  const bikeCount = activeVehicles.filter(v => v.tipoVehiculo && v.tipoVehiculo.toUpperCase() === 'BICICLETA').length;
   const totalCount = carCount + motoCount + bikeCount;
 
   return (
